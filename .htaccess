@@ -1,0 +1,20 @@
+AddDefaultCharset UTF-8
+
+Options +FollowSymLinks
+IndexIgnore */*
+RewriteEngine on
+
+RewriteCond %{REQUEST_URI} !^/(backend/web)
+RewriteRule ^assets/(.*)$ /backend/web/assets/$1 [L]
+RewriteRule ^css/(.*)$ /backend/web/css/$1 [L]
+RewriteRule ^js/(.*)$ /backend/web/js/$1 [L]
+RewriteRule ^images/(.*)$ /backend/web/images/$1 [L]
+RewriteRule ^fonts/(.*)$ /backend/web/fonts/$1 [L]
+
+
+RewriteCond %{REQUEST_URI} !^/(backend/web)
+RewriteRule (.*) /backend/web/$1
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /backend/web/index.php
