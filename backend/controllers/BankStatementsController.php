@@ -34,7 +34,7 @@ class BankStatementsController extends Controller
             'access' => [
                 'class' => AccessControl::className(),
                 'only' => [
-                    'index', 'import', 'summary-card', 'set-counteragent',
+                    'index', 'import', 'summary-card', 'set-counteragent', 'toggle-active',
                 ],
                 'rules' => [
                     [
@@ -193,12 +193,30 @@ class BankStatementsController extends Controller
                     // если движение и контрагент идентифицированы
                     $bs->ca_id = $ca_id;
                     $bs->inn = $bs->ca->inn;
-                    return $bs->save();
+                    return $bs->save(false);
                 }
             }
         }
 
         return false;
+    }
+
+    /**
+     * Переключает активность банковского движения.
+     */
+    public function actionToggleActive()
+    {
+        if (Yii::$app->request->isPost) {
+            $bs_id = intval(Yii::$app->request->get('bs_id'));
+            if ($bs_id > 0) {
+                $bs = BankStatements::findOne($bs_id);
+                if ($bs != null) {
+                    // если движение идентифицировано
+                    $bs->is_active = !$bs->is_active;
+                    return $bs->save(false);
+                }
+            }
+        }
     }
 
     /**
