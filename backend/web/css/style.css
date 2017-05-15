@@ -18,6 +18,10 @@ a.desc:after {
     content: "\f15e";
 }
 
+.app-body {
+    display: block !important;
+}
+
 .select2-container--bootstrap .select2-selection {
     font-family: PTSansCoreUI !important;
 }

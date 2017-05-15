@@ -99,7 +99,7 @@ $this->params['breadcrumbsRight'][] = ['icon' => 'fa fa-sort-amount-asc', 'url' 
 
         </div>
     </div>
-    <div id="mw_summary" class="modal fade" id="infoModal" tabindex="false" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div id="mw_summary" class="modal fade" tabindex="false" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-info" role="document">
             <div class="modal-content">
                 <div class="modal-header">

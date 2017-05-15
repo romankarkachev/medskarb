@@ -2,7 +2,7 @@
 /* @var $this yii\web\View */
 /* @var $model common\models\Counteragents */
 ?>
-<div id="mw_td" class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div id="mw_td" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-info" role="document">
         <div class="modal-content">
             <div class="modal-header">

@@ -170,7 +170,7 @@ $('input').iCheck({
     checkboxClass: 'icheckbox_square-green',
 });
 
-// 
+// Заполняет реквизиты данными, полученными через механизм API.
 //
 function fillFields(caInfo) {
     \$field = $("#counteragents-inn");

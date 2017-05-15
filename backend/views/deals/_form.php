@@ -164,7 +164,9 @@ $url_ca_contracts = Url::to(['/deals/compose-contract-field']);
 $url_contract_amount_used = Url::to(['deals/compose-amount-used-fields']);
 $url_add_documents = Url::to(['deals/add-documents-through-select']);
 $this->registerJs(<<<JS
-$.pjax.defaults.scrollTo = false;
+$('input').iCheck({
+    checkboxClass: 'icheckbox_square-green',
+});
 
 $(".select-on-check-all").on('ifChanged', function(event){
     if ($(this).prop("checked"))
