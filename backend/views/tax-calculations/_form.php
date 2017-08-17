@@ -32,12 +32,15 @@ use common\models\Periods;
 
                 </div>
                 <div class="col-md-2">
-                    <label>Рассчитать</label>
-                    <?= Html::button('<i class="fa fa-refresh"></i> Выполнить', [
-                        'id' => 'btnReloadCalculations',
-                        'class' => 'btn btn-outline-info',
-                    ]) ?>
+                    <div class="form-group field-taxcalculations-calculate">
+                        <label class="control-label">Рассчитать</label>
+                        <p><?= Html::button('<i class="fa fa-refresh"></i> Выполнить', [
+                                'id' => 'btnReloadCalculations',
+                                'class' => 'btn btn-outline-info',
+                            ]) ?>
 
+                        </p>
+                    </div>
                 </div>
             </div>
             <div class="row" id="block-calculations">

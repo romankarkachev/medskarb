@@ -2,11 +2,12 @@
 
 namespace backend\controllers;
 
-use common\models\BankStatementsFiles;
+use backend\models\BankStatementsClear;
 use Yii;
 use common\models\BankStatements;
 use common\models\BankStatementsSearch;
 use backend\models\BankStatementsImport;
+use common\models\BankStatementsFiles;
 use common\models\Counteragents;
 use common\models\Periods;
 use common\models\SkipBankRecords;
@@ -258,12 +259,12 @@ class BankStatementsController extends Controller
                     $row_number = 1; // 0-я строка - это заголовок
                     foreach ($data as $row) {
                         // проверяем обязательные поля
-                        $date = trim($row['C']);
+                        $date = trim($row['B']);
                         // если достигнут конец файла, то заканчиваем процедуру
                         if ($date == '') break;
 
                         // назначение платежа
-                        $description = $row['AA'];
+                        $description = $row['Y'];
 
                         // проверим, не встречаются ли слова, которые исключают движение из расчета
                         $is_active = BankStatementsImport::CheckIfExcludes($excludes, $description);
@@ -279,8 +280,8 @@ class BankStatementsController extends Controller
                             continue;
                         }
 
-                        $bank_dt = trim($row['F']);
-                        $bank_kt = trim($row['J']);
+                        $bank_dt = trim($row['D']);
+                        $bank_kt = trim($row['H']);
 
                         // определим инн
                         $inn = BankStatementsImport::DetermineInn($bank_kt);
@@ -301,7 +302,7 @@ class BankStatementsController extends Controller
                             continue;
                         }
 
-                        $doc_num = intval(trim($row['Q']));
+                        $doc_num = intval(trim($row['R']));
                         if ($doc_num == 0) $errors_import[] = 'В строке '.$row_number.' определен номер платежного поручения!';
 
                         $new_record = new BankStatements();
@@ -376,6 +377,26 @@ class BankStatementsController extends Controller
         if ($period != null) $model->period_id = $period->id;
 
         return $this->render('import', [
+            'model' => $model,
+        ]);
+    }
+
+    /**
+     * Очистка банковских движений (удаление всех записей за выбранный период).
+     * @return mixed
+     */
+    public function actionClear()
+    {
+        $model = new BankStatementsClear();
+
+        if (Yii::$app->request->isPost) {
+            $model->load(Yii::$app->request->post());
+            BankStatements::deleteAll(['period_id' => $model->period_id, 'type' => BankStatements::TYPE_AUTO]);
+
+            return $this->redirect(['/bank-statements']);
+        }
+
+        return $this->render('clear', [
             'model' => $model,
         ]);
     }

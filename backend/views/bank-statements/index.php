@@ -18,6 +18,8 @@ $this->params['breadcrumbsRight'][] = ['icon' => 'fa fa-sort-amount-asc', 'url' 
     <p>
         <?= Html::a('<i class="fa fa-plus"></i> Добавить', ['create'], ['class' => 'btn btn-success']) ?>
 
+        <?= Html::a('<i class="fa fa-trash-o" aria-hidden="true"></i> Удалить...', ['clear'], ['class' => 'btn btn-danger pull-right']) ?>
+
         <?= Html::a('<i class="fa fa-file-excel-o" aria-hidden="true"></i> Импорт из Excel', ['import'], ['class' => 'btn btn-secondary pull-right']) ?>
 
     </p>
