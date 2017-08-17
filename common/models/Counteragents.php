@@ -191,7 +191,7 @@ class Counteragents extends ActiveRecord
         // тип контрагента
         if ($type_id == self::API_CA_TYPE_ЮРЛИЦО) {
             // юридическое лицо
-            $query->setUrl('https://ru.rus.company/интеграция/компании/');
+            $query->setUrl('https://xn--c1aubj.xn--80asehdb/интеграция/компании/');
             switch ($field_id) {
                 case self::API_FIELD_ИНН:
                     $query->setData(['инн' => $value]);
@@ -206,7 +206,7 @@ class Counteragents extends ActiveRecord
         }
         else {
             // физическое лицо
-            $query->setUrl('https://ru.rus.company/интеграция/ип/');
+            $query->setUrl('https://xn--c1aubj.xn--80asehdb/интеграция/ип/');
             switch ($field_id) {
                 case self::API_FIELD_ИНН:
                     $query->setData(['инн' => $value]);
