@@ -52,15 +52,15 @@ $items = [
 <body class="app header-fixed sidebar-fixed">
 <?php $this->beginBody() ?>
 <header class="app-header navbar">
-    <button class="navbar-toggler mobile-sidebar-toggler d-lg-none" type="button">☰</button>
+    <button class="navbar-toggler mobile-sidebar-toggler d-lg-none" type="button"><i class="fa fa-bars" aria-hidden="true"></i></button>
     <a class="navbar-brand" href="#"></a>
     <ul class="nav navbar-nav d-md-down-none">
         <li class="nav-item">
-            <a class="nav-link navbar-toggler sidebar-toggler" href="#">☰</a>
+            <a class="nav-link navbar-toggler sidebar-toggler" href="#"><i class="fa fa-bars" aria-hidden="true"></i></a>
         </li>
     </ul>
     <ul class="nav navbar-nav ml-auto">
-        <li class="nav-item d-md-down-none">
+        <li class="nav-item">
             <?= Html::a('<i class="icon-logout"></i>', ['/logout'], ['class' => 'nav-link', 'title' => 'Выйти из системы', 'data-method' => 'post']) ?>
 
         </li>

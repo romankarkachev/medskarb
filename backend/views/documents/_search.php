@@ -70,6 +70,11 @@ $action = ($action_id == null ? '' : '/' . $action_id);
                                 'weekStart' => 1,
                                 'autoclose' => true,
                             ],
+                            'pluginEvents' => [
+                                'changeDate' => 'function(e) {
+        anyDateOnChange();
+                                        }',
+                            ],
                         ],
                     ]) ?>
 
@@ -92,6 +97,11 @@ $action = ($action_id == null ? '' : '/' . $action_id);
                                 'todayHighlight' => true,
                                 'weekStart' => 1,
                                 'autoclose' => true,
+                            ],
+                            'pluginEvents' => [
+                                'changeDate' => 'function(e) {
+        anyDateOnChange();
+                                        }',
                             ],
                         ],
                     ]) ?>
@@ -134,3 +144,20 @@ $action = ($action_id == null ? '' : '/' . $action_id);
     <?php ActiveForm::end(); ?>
 
 </div>
+<?php
+$this->registerJs(<<<JS
+// Функция-обработчик изменения даты в любом из соответствующих полей.
+//
+function anyDateOnChange() {
+    \$button = $("button[type='submit']");
+    \$button.attr("disabled", "disabled");
+    text = \$button.text();
+    \$button.text("Подождите...");
+    setTimeout(function () {
+        \$button.removeAttr("disabled");
+        \$button.text(text);
+    }, 2000);
+}
+JS
+, \yii\web\View::POS_BEGIN);
+?>

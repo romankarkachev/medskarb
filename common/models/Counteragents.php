@@ -227,7 +227,7 @@ class Counteragents extends ActiveRecord
                     $details = $response->data[0];
                     if ($type_id == self::API_CA_TYPE_ЮРЛИЦО) {
                         // сразу второй запрос, потому что контрагент-юрлицо идентифицирован однозначно
-                        $query->setUrl('https://ru.rus.company/интеграция/компании/' . $details['id'] . '/');
+                        $query->setUrl('https://xn--c1aubj.xn--80asehdb/интеграция/компании/' . $details['id'] . '/');
                         $response = $query->send();
                         if ($response->isOk) return [$response->data];
                     }
