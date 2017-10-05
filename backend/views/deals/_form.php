@@ -164,6 +164,20 @@ $url_ca_contracts = Url::to(['/deals/compose-contract-field']);
 $url_contract_amount_used = Url::to(['deals/compose-amount-used-fields']);
 $url_add_documents = Url::to(['deals/add-documents-through-select']);
 $this->registerJs(<<<JS
+// Функция-обработчик изменения значения в поле Договор контрагента.
+//
+function ContractOnChange() {
+    $("#block-amount_used").html("<i class=\"fa fa-spinner fa-pulse fa-fw text-primary\"></i>");
+    contract_id = $("#deals-contract_id").val();
+    if (contract_id != "" && contract_id != undefined) {
+        $("#block-amount_used").show();
+        $("#block-amount_used").load("$url_contract_amount_used?contract_id=" + contract_id);
+    }
+} // ContractOnChange()
+JS
+, yii\web\View::POS_BEGIN);
+
+$this->registerJs(<<<JS
 $('input').iCheck({
     checkboxClass: 'icheckbox_square-green',
 });
@@ -188,17 +202,6 @@ function CounteragentOnChange() {
         });
     }
 }; // CounteragentOnChange()
-
-// Функция-обработчик изменения значения в поле Договор контрагента.
-//
-function ContractOnChange() {
-    $("#block-amount_used").html("<i class=\"fa fa-spinner fa-pulse fa-fw text-primary\"></i>");
-    contract_id = $("#deals-contract_id").val();
-    if (contract_id != "" && contract_id != undefined) {
-        $("#block-amount_used").show();
-        $("#block-amount_used").load("$url_contract_amount_used?contract_id=" + contract_id);
-    }
-} // ContractOnChange()
 
 // Обработчик щелчка по ссылке "Открыть договор в новом окне".
 //

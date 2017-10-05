@@ -57,6 +57,8 @@ class Deals extends \yii\db\ActiveRecord
             [['created_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['created_by' => 'id']],
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Counteragents::className(), 'targetAttribute' => ['customer_id' => 'id']],
             [['updated_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['updated_by' => 'id']],
+            // собственные правила валидации
+            ['contract_id', 'validateContract', 'skipOnEmpty' => false],
         ];
     }
 
@@ -83,6 +85,15 @@ class Deals extends \yii\db\ActiveRecord
             'brokerRuName' => 'Брокер РФ',
             'brokerLnrName' => 'Брокер ЛНР',
         ];
+    }
+
+    /**
+     * Валидация поля "Договор".
+     */
+    public function validateContract()
+    {
+        if ($this->customer_id != null && $this->contract_id == null)
+            $this->addError('contract_id', 'Поле "Договор" обязательно для заполнения.');
     }
 
     /**

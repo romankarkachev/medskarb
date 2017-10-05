@@ -131,7 +131,8 @@ class DealsController extends Controller
             $contracts = $model->customer->arrayMapOfContractsOfThisCounteragentForSelect2();
 
             // использовано средств по договору
-            $amountUsed = $model->contract->getAmountUsed();
+            $amountUsed = 0;
+            if ($model->contract != null) $amountUsed = $model->contract->getAmountUsed();
 
             // документы к сделке
             $dataProviders = $model->collectDocumentsDataProviders();
