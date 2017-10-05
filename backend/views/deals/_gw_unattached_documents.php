@@ -10,7 +10,7 @@ use yii\grid\GridView;
     'dataProvider' => $dpDocumentsUnattached,
     'id' => 'gw-docs_unattached',
     'layout' => '{items}',
-    'tableOptions' => ['class' => 'table table-sm'],
+    'tableOptions' => ['class' => 'table table-sm table-hover'],
     'columns' => [
         [
             'class' => 'yii\grid\CheckboxColumn',

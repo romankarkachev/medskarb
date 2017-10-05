@@ -201,7 +201,7 @@ class Deals extends \yii\db\ActiveRecord
             'pagination' => false,
             'sort' => [
                 'route' => 'deals/update',
-                'defaultOrder' => ['doc_date' => SORT_DESC],
+                'defaultOrder' => ['doc_date' => SORT_DESC, 'typeName' => SORT_ASC],
                 'attributes' => [
                     'id',
                     'doc_date',
@@ -233,7 +233,7 @@ class Deals extends \yii\db\ActiveRecord
         // файлы, привязанные к сделке
         $subarray = DealsFiles::find()
             ->select(['id', 'uploaded_at', 'ofn', 'size'])
-            ->where(['deal_id' => $this->customer_id])
+            ->where(['deal_id' => $this->id])
             ->asArray()->all();
         foreach ($subarray as $file) {
             /* @var $file \common\models\DealsFiles */
