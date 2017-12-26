@@ -27,7 +27,6 @@
         "kartik-v/yii2-datecontrol": "@dev",
         "kartik-v/yii2-widget-select2": "@dev",
         "kartik-v/yii2-widget-datepicker": "@dev",
-        "kartik-v/yii2-money": "dev-master",
         "kartik-v/yii2-widget-fileinput": "@dev",
         "hiqdev/yii2-asset-icheck": "1.0.2.5",
         "moonlandsoft/yii2-phpexcel": "*",
