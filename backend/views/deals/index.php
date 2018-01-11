@@ -11,14 +11,11 @@ use backend\components\grid\GridView;
 $this->title = 'Сделки | ' . Yii::$app->name;
 $this->params['breadcrumbs'][] = 'Сделки';
 
+$this->params['breadcrumbsRight'][] = ['label' => 'Создать', 'icon' => 'fa fa-plus-circle fa-lg', 'url' => ['create'], 'class' => 'btn text-success'];
 $this->params['breadcrumbsRight'][] = ['label' => 'Отбор', 'icon' => 'fa fa-filter', 'url' => '#frmSearch', 'data-target' => '#frmSearch', 'data-toggle' => 'collapse', 'aria-expanded' => $searchApplied === true ? 'true' : 'false', 'aria-controls' => 'frmSearch'];
 $this->params['breadcrumbsRight'][] = ['icon' => 'fa fa-sort-amount-asc', 'url' => ['/deals'], 'title' => 'Сбросить отбор и применить сортировку по-умолчанию'];
 ?>
 <div class="deals-list">
-    <p>
-        <?= Html::a('<i class="fa fa-plus-circle"></i> Создать', ['create'], ['class' => 'btn btn-success']) ?>
-
-    </p>
     <?= $this->render('_search', ['model' => $searchModel, 'searchApplied' => $searchApplied]); ?>
 
     <div class="card">

@@ -82,6 +82,23 @@ class DocumentsSearch extends Documents
     public function search($params, $route = 'documents')
     {
         $query = Documents::find();
+        $query->select([
+            '*',
+            'id' => 'documents.id',
+            'type_id' => 'documents.type_id',
+            'filesCount' => 'files.count',
+        ]);
+
+        // LEFT JOIN выполняется быстрее, чем подзапрос в SELECT-секции
+        // присоединяем количество файлов
+        $query->leftJoin('(
+            SELECT
+                documents_files.doc_id,
+                COUNT(documents_files.id) AS count
+            FROM documents_files
+            GROUP BY documents_files.doc_id
+        ) AS files', '`documents`.`id` = `files`.`doc_id`');
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => [
@@ -111,6 +128,7 @@ class DocumentsSearch extends Documents
                         'asc' => ['documents.doc_date' => SORT_ASC, 'documents.doc_num' => SORT_ASC],
                         'desc' => ['documents.doc_date' => SORT_DESC, 'documents.doc_num' => SORT_DESC],
                     ],
+                    'filesCount',
                 ],
             ]
         ]);

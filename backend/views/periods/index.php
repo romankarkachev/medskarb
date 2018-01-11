@@ -9,12 +9,10 @@ use backend\components\grid\GridView;
 
 $this->title = 'Периоды | ' . Yii::$app->name;
 $this->params['breadcrumbs'][] = 'Периоды';
+
+$this->params['breadcrumbsRight'][] = ['label' => 'Создать', 'icon' => 'fa fa-plus-circle fa-lg', 'url' => ['create'], 'class' => 'btn text-success'];
 ?>
 <div class="periods-list">
-    <p>
-        <?= Html::a('<i class="fa fa-plus-circle"></i> Создать', ['create'], ['class' => 'btn btn-success']) ?>
-
-    </p>
     <div class="card">
         <div class="card-block">
             <?= GridView::widget([

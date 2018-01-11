@@ -23,7 +23,7 @@ $this->params['breadcrumbs'][] = 'Очистка';
             ]) ?>
 
             <div class="row">
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <?= $form->field($model, 'period_id')->widget(Select2::className(), [
                         'data' => Periods::arrayMapForSelect2(),
                         'theme' => Select2::THEME_BOOTSTRAP,

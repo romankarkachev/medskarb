@@ -13,6 +13,11 @@ use common\models\BankStatements;
 class BankStatementsSearch extends BankStatements
 {
     /**
+     * Разделитель имен файлов для присоединяемого запроса.
+     */
+    const FILES_DELIMITER = '|';
+
+    /**
      * Поле отбора, определяющее начало периода даты движения.
      * @var string
      */
@@ -70,6 +75,24 @@ class BankStatementsSearch extends BankStatements
     public function search($params)
     {
         $query = BankStatements::find();
+        $query->select([
+            '*',
+            'id' => 'bank_statements.id',
+            'filesCount' => 'files.count',
+            'filesDetails' => 'files.details',
+        ]);
+
+        // LEFT JOIN выполняется быстрее, чем подзапрос в SELECT-секции
+        // присоединяем количество файлов
+        $query->leftJoin('(
+            SELECT
+                bank_statements_files.bs_id,
+                COUNT(bank_statements_files.id) AS count,
+                GROUP_CONCAT(bank_statements_files.fn SEPARATOR "' . self::FILES_DELIMITER . '") AS details
+            FROM bank_statements_files
+            GROUP BY bank_statements_files.bs_id
+        ) AS files', '`bank_statements`.`id` = `files`.`bs_id`');
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => false,

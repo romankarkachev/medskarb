@@ -6,8 +6,6 @@ return [
     'modules' => [
         'user' => [
             'class' => 'dektrium\user\Module',
-            'as frontend' => 'dektrium\user\filters\FrontendFilter',
-            'as backend' => 'dektrium\user\filters\BackendFilter',
             'admins' => ['root'],
             'enableRegistration' => false,
             'enableConfirmation' => false,
@@ -15,11 +13,11 @@ return [
             'enableFlashMessages' => false,
             'modelMap' => [
                 'User' => 'common\models\User',
-                //'UserSearch' => 'common\models\UserSearch',
+                'UserSearch' => 'common\models\UserSearch',
             ],
             'controllerMap' => [
-                //'admin' => 'backend\controllers\UsersController',
-                //'settings' => 'backend\controllers\SettingsController',
+                'admin' => 'backend\controllers\UsersController',
+                'settings' => 'backend\controllers\UsersSettingsController',
                 'security' => 'backend\controllers\SecurityController',
             ],
         ],

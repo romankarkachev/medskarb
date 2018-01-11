@@ -265,7 +265,7 @@ class Deals extends \yii\db\ActiveRecord
         // файлы, привязанные к договору с контрагентом
         $subarray = DocumentsFiles::find()
             ->select(['id', 'doc_id', 'uploaded_at', 'ofn', 'size'])
-            ->where(['doc_id' => $this->customer->contract_id])
+            ->where(['doc_id' => $this->contract_id])
             ->all();
         foreach ($subarray as $file) {
             /* @var $file \common\models\DocumentsFiles */
@@ -275,7 +275,8 @@ class Deals extends \yii\db\ActiveRecord
                 'ofn' => $file->ofn,
                 'sort' => 2,
                 'type' => 2,
-                'rep' => 'Договор контрагента № ' . $file->doc->id . ' от ' . Yii::$app->formatter->asDate($file->doc->doc_date),
+                'doc_id' => $file->doc->id,
+                'rep' => 'Договор контрагента № ' . $file->doc->doc_num . ' от ' . Yii::$app->formatter->asDate($file->doc->doc_date),
                 'url' => Url::to(['/documents/download', 'id' => $file['id']]),
                 'size' => $file->size,
             ];
@@ -285,7 +286,6 @@ class Deals extends \yii\db\ActiveRecord
         // файлы, привязанные к документам
         $subarray = DocumentsFiles::find()
             ->select(['id', 'doc_id', 'uploaded_at', 'ofn', 'size'])
-            //->leftJoin('types_documents', '')
             ->where(['in', 'doc_id', $attachedDocsIds])
             ->all();
         foreach ($subarray as $file) {
@@ -296,8 +296,9 @@ class Deals extends \yii\db\ActiveRecord
                 'ofn' => $file->ofn,
                 'sort' => 3,
                 'type' => $file->doc->type->id,
+                'doc_id' => $file->doc->id,
                 'rep' => $file->doc->type->name .
-                    ' № ' . $file->doc->id .
+                    ' № ' . $file->doc->doc_num .
                     ' от ' . Yii::$app->formatter->asDate($file->doc->doc_date) .
                     ' (' . $file->doc->ca->name . ')',
                 'url' => Url::to(['/documents/download', 'id' => $file['id']]),

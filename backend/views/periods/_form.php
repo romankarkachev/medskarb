@@ -61,8 +61,12 @@ use kartik\datecontrol\DateControl;
                     ]) ?>
 
                 </div>
-                <div class="col-md-1">
+                <div class="col-md-2">
                     <?= $form->field($model, 'quarter_num')->textInput(['placeholder' => '№', 'title' => 'Введите номер квартала'])->label('№ кв.') ?>
+
+                </div>
+                <div class="col-md-2">
+                    <?= $form->field($model, 'year')->textInput(['placeholder' => '№', 'title' => 'Введите номер года'])->label('№ года') ?>
 
                 </div>
             </div>

@@ -31,6 +31,12 @@ use yii\db\Expression;
 class Documents extends ActiveRecord
 {
     /**
+     * Вычисляемое виртуальное поле.
+     * @var integer количество файлов, приаттаченных к документу
+     */
+    public $filesCount;
+
+    /**
      * Идентификатор сделки, в которую необходимо включить создаваемый документ.
      * @var integer|null
      */
@@ -81,10 +87,11 @@ class Documents extends ActiveRecord
             'amount' => 'Сумма',
             'comment' => 'Описание',
             'includeInDeal_id' => 'Включить в сделку',
-            // для сортировки
+            // вычисляемые поля
             'caName' => 'Контрагент',
             'typeName' => 'Тип',
             'documentRep' => 'Номер и дата',
+            'filesCount' => 'Файлов',
         ];
     }
 
@@ -158,11 +165,13 @@ class Documents extends ActiveRecord
             // для списка документов типа Акты брокера РФ
             'broker-ru' => [
                 'type_id' => TypesDocuments::DOCUMENT_TYPE_АКТ_ВЫПОЛНЕННЫХ_РАБОТ,
+                'ca_type_id' => TypesCounteragents::COUNTERAGENT_TYPE_БРОКЕР_РФ,
                 'final_bc' => 'Акты выполненных работ брокера РФ',
             ],
             // для списка документов типа Акты брокера ЛНР
             'broker-lnr' => [
                 'type_id' => TypesDocuments::DOCUMENT_TYPE_АКТ_ВЫПОЛНЕННЫХ_РАБОТ,
+                'ca_type_id' => TypesCounteragents::COUNTERAGENT_TYPE_БРОКЕР_ЛНР,
                 'final_bc' => 'Акты выполненных работ брокера ЛНР',
             ],
         ];
@@ -193,7 +202,9 @@ class Documents extends ActiveRecord
     {
         $ds = Documents::fetchDocumentsSettings();
         foreach ($ds as $url => $row) {
-            if ($row['type_id'] == $this->type_id)
+            $caCompare = null;
+            if (isset($row['ca_type_id'])) $caCompare = $row['ca_type_id'] == $this->ca->type_id; else $caCompare = true;
+            if ($row['type_id'] == $this->type_id && $caCompare != null)
                 return [
                     'url' => $url,
                     'bc' => $row['final_bc'],

@@ -27,6 +27,11 @@ use moonland\phpexcel\Excel;
 class BankStatementsController extends Controller
 {
     /**
+     * Количество пробелов, накопив которое процедура импорта остановится.
+     */
+    const SPACES_TO_STOP_IMPORT = 10;
+
+    /**
      * @inheritdoc
      */
     public function behaviors()
@@ -34,13 +39,11 @@ class BankStatementsController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => [
-                    'index', 'import', 'summary-card', 'set-counteragent', 'toggle-active',
-                ],
                 'rules' => [
                     [
+                        'actions' => ['index', 'create', 'import', 'clear', 'summary-card', 'set-counteragent', 'toggle-active'],
                         'allow' => true,
-                        'roles' => ['root'],
+                        'roles' => ['@'],
                     ],
                 ],
             ],
@@ -240,10 +243,16 @@ class BankStatementsController extends Controller
                 $model->load(Yii::$app->request->post());
                 // если файл удалось успешно загрузить на сервер
                 // выбираем все данные из файла в массив
-                $data = Excel::import($filename, [
-                    'setFirstRecordAsKeys' => false,
-                ]);
-                if (count($data) > 0) {
+                try {
+                    $data = Excel::import($filename, [
+                        'setFirstRecordAsKeys' => false,
+                    ]);
+                }
+                catch (\Exception $exception) {
+                    Yii::$app->session->setFlash('error', $exception);
+                }
+
+                if (isset($data) && count($data) > 0) {
                     // если удалось прочитать, сразу удаляем файл
                     unlink($filename);
 
@@ -254,14 +263,24 @@ class BankStatementsController extends Controller
                     $inns = Counteragents::find()->select('id, inn')->asArray()->all();
 
                     // перебираем массив и создаем новые элементы
+                    $spaces = 0; // количество накопленных пробелов для остановки всей процедуры импорта
                     $result = []; // массив для элементов при предварительном просмотре
                     $errors_import = array(); // массив для ошибок при импорте
                     $row_number = 1; // 0-я строка - это заголовок
                     foreach ($data as $row) {
                         // проверяем обязательные поля
                         $date = trim($row['B']);
+
+                        // проверим, не является ли эта строка пустой
+                        if ($date == '') {
+                            $spaces++;
+                            $row_number++;
+                            continue;
+                        }
                         // если достигнут конец файла, то заканчиваем процедуру
-                        if ($date == '') break;
+                        if ($spaces == self::SPACES_TO_STOP_IMPORT) break;
+                        // но если дата берется нормально, то сбросим количество пустых строк и продолжим обрабатывать строку
+                        $spaces = 0;
 
                         // назначение платежа
                         $description = $row['Y'];
@@ -271,11 +290,15 @@ class BankStatementsController extends Controller
 
                         // преобразуем дату
                         $bank_date = BankStatementsImport::normalizeDate($date);
+                        if ($bank_date === false) {
+                            $row_number++;
+                            continue;
+                        }
 
                         // проверим, входит ли дата в выбранный период)
                         $date_timestamp = strtotime($bank_date . ' 00:00:00');
                         if ($date_timestamp < $model->period->start || $date_timestamp > $model->period->end) {
-                            $errors_import[] = 'Строка '.$row_number.' пропущена из-за несоответствия даты периоду!';
+                            $errors_import[] = 'Строка ' . $row_number . ' пропущена из-за несоответствия даты периоду!';
                             $row_number++;
                             continue;
                         }
@@ -297,13 +320,13 @@ class BankStatementsController extends Controller
 
                         // проверим, указана ли хотя бы одна сумма
                         if ($amount_dt == 0 && $amount_kt == 0) {
-                            $errors_import[] = 'В строке '.$row_number.' не удалось определить сумму платежа!';
+                            $errors_import[] = 'В строке ' . $row_number . ' не удалось определить сумму платежа!';
                             $row_number++;
                             continue;
                         }
 
                         $doc_num = intval(trim($row['R']));
-                        if ($doc_num == 0) $errors_import[] = 'В строке '.$row_number.' определен номер платежного поручения!';
+                        if ($doc_num == 0) $errors_import[] = 'В строке ' . $row_number . ' определен номер платежного поручения!';
 
                         $new_record = new BankStatements();
                         $new_record->period_id = $model->period_id;
@@ -315,7 +338,7 @@ class BankStatementsController extends Controller
                         $new_record->bank_kt = $bank_kt;
                         $new_record->bank_amount_dt = $amount_dt;
                         $new_record->bank_amount_kt = $amount_kt;
-                        $new_record->bank_bik_name = $row['U'];
+                        $new_record->bank_bik_name = $row['V'];
                         $new_record->bank_doc_num = strval($doc_num);
                         $new_record->bank_description = $description;
                         $new_record->inn = $inn;
@@ -329,7 +352,7 @@ class BankStatementsController extends Controller
                             foreach ($new_record->errors as $error)
                                 foreach ($error as $detail)
                                     $details .= '<p>'.$detail.'</p>';
-                            $errors_import[] = 'В строке '.$row_number.' не удалось сохранить новый элемент.'.$details;
+                            $errors_import[] = 'В строке ' . $row_number . ' не удалось сохранить новый элемент.'.$details;
                         }
 
                         $row_number++;
@@ -345,7 +368,6 @@ class BankStatementsController extends Controller
 
                     if ($model->is_preview) {
                         // если пользователь выполняет предварительный просмотр
-                        $searchModel = new BankStatementsSearch();
                         $dataProvider = new ArrayDataProvider([
                             'modelClass' => 'common\models\BankStatements',
                             'allModels' => $result,
@@ -360,6 +382,7 @@ class BankStatementsController extends Controller
                                 ],
                             ],
                         ]);
+                        $dataProvider->sort = false;
 
                         return $this->render('import', [
                             'model' => $model,

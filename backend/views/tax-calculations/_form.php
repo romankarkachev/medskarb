@@ -3,9 +3,7 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\bootstrap\ActiveForm;
-use yii\widgets\Pjax;
 use kartik\select2\Select2;
-use kartik\money\MaskMoney;
 use common\models\Periods;
 
 /* @var $this yii\web\View */

@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "auth_item".
@@ -25,6 +26,14 @@ use Yii;
  */
 class AuthItem extends \yii\db\ActiveRecord
 {
+    /**
+     * @var array набор доступных для менеджера ролей
+     */
+    const SET_FOR_MANAGER = [
+        'manager',
+        'user',
+    ];
+
     /**
      * @inheritdoc
      */
@@ -61,6 +70,20 @@ class AuthItem extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    /**
+     * Делает выборку ролей пользователей и возвращает в виде массива.
+     * Применяется для вывода в виджетах Select2.
+     * @return array
+     */
+    public static function arrayMapForSelect2()
+    {
+        $query = self::find();
+        $query->orderBy('description');
+        if (!Yii::$app->user->can('root')) $query->where(['in', 'name', self::SET_FOR_MANAGER]);
+
+        return ArrayHelper::map($query->all(), 'name', 'description');
     }
 
     /**

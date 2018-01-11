@@ -34,6 +34,18 @@ use yii\web\UploadedFile;
 class BankStatements extends \yii\db\ActiveRecord
 {
     /**
+     * Вычисляемое виртуальное поле.
+     * @var integer количество файлов, приаттаченных к банковскому движению
+     */
+    public $filesCount;
+
+    /**
+     * Вычисляемое виртуальное поле.
+     * @var integer количество файлов, приаттаченных к документу
+     */
+    public $filesDetails;
+
+    /**
      * @var UploadedFile
      */
     public $imageFile;

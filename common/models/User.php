@@ -8,10 +8,51 @@ use dektrium\user\models\Profile;
 use dektrium\user\models\User as BaseUser;
 
 /**
- *
+ * Модель для таблицы пользователей.
  */
 class User extends BaseUser
 {
+    /**
+     * @var string ФИО или наименование организации
+     */
+    public $name;
+
+    /**
+     * @var string роль
+     */
+    public $role_id;
+
+    /**
+     * @var string подтверждение пароля
+     */
+    public $password_confirm;
+
+    /**
+     * ФИО пользователя (для вложенного запроса и сортировки).
+     * @var string
+     */
+    public $profileName;
+
+    /**
+     * Описание роли пользователя (для вложенного запроса и сортировки).
+     * @var string
+     */
+    public $roleName;
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        return ArrayHelper::merge(parent::attributeLabels(), [
+            'name' => 'Имя',
+            'role_id' => 'Роль',
+            'password_confirm' => 'Подтверждение пароля',
+            'profileName' => 'Имя',
+            'roleName' => 'Роль',
+        ]);
+    }
+
     /**
      * @inheritdoc
      */
@@ -43,6 +84,64 @@ class User extends BaseUser
     }
 
     /**
+     * Формирует пользовательское меню в зависимости от роли.
+     * Элементы используются в сайдбаре.
+     * @return array
+     */
+    public static function prepareUserSidebarMenu()
+    {
+        if (Yii::$app->user->can('root'))
+            return [
+                ['label' => 'Контрагенты', 'icon' => 'fa fa-address-book-o', 'url' => ['/counteragents']],
+                ['label' => 'Сделки', 'icon' => 'fa fa-handshake-o', 'url' => ['/deals']],
+                ['label' => '<li class="nav-title">Документы</li>'],
+                ['label' => 'Прих. накл.', 'icon' => 'fa fa-folder-open', 'url' => ['/documents/receipts']],
+                ['label' => 'Расх. накл.', 'icon' => 'fa fa-folder-open', 'url' => ['/documents/expenses']],
+                ['label' => 'Акты брокера РФ', 'icon' => 'fa fa-folder-open', 'url' => ['/documents/broker-ru']],
+                ['label' => 'Акты брокера ЛНР', 'icon' => 'fa fa-folder-open', 'url' => ['/documents/broker-lnr']],
+                ['label' => 'Договоры', 'icon' => 'fa fa-folder-open', 'url' => ['/documents/contracts']],
+                ['label' => 'Все', 'icon' => 'fa fa-folder-open', 'url' => ['/documents']],
+                ['label' => '<li class="nav-title">Налогообложение</li>'],
+                ['label' => 'Банковские движения', 'icon' => 'fa fa-bank', 'url' => ['/bank-statements']],
+                ['label' => 'Расчеты налога', 'icon' => 'fa fa-balance-scale', 'url' => ['/tax-calculations']],
+                [
+                    'label' => 'Справочники',
+                    'url' => '#',
+                    'items' => [
+                        ['label' => 'Периоды', 'icon' => 'fa fa-calendar', 'url' => ['/periods']],
+                        ['label' => 'Игнор для банка', 'icon' => 'fa fa-bank', 'url' => ['/skip-bank-records']],
+                        ['label' => 'Пользователи', 'icon' => 'fa fa-users', 'url' => ['/users']],
+                    ],
+                ],
+                ['label' => 'Настройки', 'icon' => 'fa fa-cogs', 'url' => ['/settings']],
+            ];
+
+        if (Yii::$app->user->can('operator'))
+            return [
+                ['label' => 'Контрагенты', 'icon' => 'fa fa-address-book-o', 'url' => ['/counteragents']],
+                ['label' => '<li class="nav-title">Налогообложение</li>'],
+                ['label' => 'Банковские движения', 'icon' => 'fa fa-bank', 'url' => ['/bank-statements']],
+                ['label' => 'Расчеты налога', 'icon' => 'fa fa-balance-scale', 'url' => ['/tax-calculations']],
+            ];
+
+        return [];
+    }
+
+    /**
+     * Возвращает наименование текущего пользователя в виде root (Иван).
+     * @return string
+     */
+    public static function getCurrentUserFullRepresentation()
+    {
+        $user = Yii::$app->user->identity;
+        $username = $user->username;
+        if ($user->profile->name != null && trim($user->profile->name) != '')
+            $username .= ' (' . trim($user->profile->name) . ')';
+
+        return $username;
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getProfile()
@@ -65,5 +164,23 @@ class User extends BaseUser
     {
         return $this->hasOne(AuthItem::className(), ['name' => 'item_name'])
             ->via('userRoles');
+    }
+
+    /**
+     * Возвращает наименование роли пользователя.
+     * @return string
+     */
+    public function getRoleName()
+    {
+        return $this->role != null ? $this->role->name : '';
+    }
+
+    /**
+     * Возвращает описание роли пользователя.
+     * @return string
+     */
+    public function getRoleDescription()
+    {
+        return $this->role != null ? $this->role->description : '';
     }
 }

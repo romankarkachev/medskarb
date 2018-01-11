@@ -41,6 +41,7 @@ return [
             'theme' => [
                 'pathMap' => [
                     '@dektrium/user/views' => '@backend/views/user',
+                    '@yii/gii/views' => '@backend/views/gii', // при применении темы CoreUI gii настраивается отдельно
                 ],
             ],
         ],
@@ -60,17 +61,14 @@ return [
             'showScriptName' => false,
             'rules' => [
                 '' => 'default/index',
-                '<action:login>' => '/user/security/login',
-                '<action:logout>' => '/user/security/logout',
-                '<action:users>' => '/user/admin/index',
-                '<controller:users>/<action:create>' => '/user/admin/create',
-                '<controller:users>/<action:update>' => '/user/admin/update',
-                '<controller:users>/<action:delete>' => '/user/admin/delete',
-                '<controller:users>/<action:update-profile>' => '/user/admin/update-profile',
-                '<controller:users>/<action:assignments>' => '/user/admin/assignments',
-                '<action:profile>' => 'user/settings/<action>',
-                '<action:account>' => 'user/settings/<action>',
-                '<controller:documents>/<action:create|update|delete|upload-files|download|delete-file>' => '<controller>/<action>',
+                '<action:help>' => 'default/<action>',
+                '<action:login|logout>' => '/user/security/<action>',
+                '/register' => '/user/registration/register',
+                '/reset' => '/user/recovery/request',
+                '/users' => '/user/admin/index',
+                '<controller:users>/<action:create|update|delete|update-profile|info|confirm|block|assignments>' => '/user/admin/<action>',
+                '<action:profile|account>' => '/user-settings/<action>',
+                '<controller:documents>/<action:create|update|delete|upload-files|download|preview-file|delete-file>' => '<controller>/<action>',
                 '<controller:documents>/<action_id:[\w_\/-]+>' => 'documents/index',
                 '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
             ],

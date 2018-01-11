@@ -5,6 +5,7 @@ namespace backend\controllers;
 use common\models\Deals;
 use common\models\DealsDocuments;
 use common\models\DocumentsFilesSearch;
+use common\models\Settings;
 use common\models\TypesCounteragents;
 use common\models\TypesDocuments;
 use Yii;
@@ -35,7 +36,7 @@ class DocumentsController extends Controller
                     // при добавлении действия продублировать при необходимости в UrlManager в common\config\main.php
                     'index', 'create', 'update', 'delete',
                     'contracts', 'receipts', 'expenses', 'broker-ru', 'broker-lnr',
-                    'upload-files', 'download', 'delete-file'
+                    'upload-files', 'download', 'preview-file', 'delete-file',
                 ],
                 'rules' => [
                     [
@@ -111,7 +112,16 @@ class DocumentsController extends Controller
                 }
             }
 
-            return $this->redirect(['/documents']);
+            $action_id = null;
+            $ds = $model->getDocumentsListUrlByType();
+            if (is_array($ds)) if (count($ds) == 2) {
+                $action_id = $ds['url'];
+            }
+
+            if ($action_id == null)
+                return $this->redirect(['/documents']);
+            else
+                return $this->redirect(['/documents/' . $action_id]);
         } else {
             $action_id = null;
             $final_bc = 'Документы'; // последняя хлебная крошка
@@ -122,6 +132,24 @@ class DocumentsController extends Controller
                 if (isset($documentSettings[$action_id])) {
                     $model->type_id = $documentSettings[$action_id]['type_id'];
                     $final_bc = $documentSettings[$action_id]['final_bc'];
+
+                    $settings = Settings::findOne(1);
+                    if ($settings != null) {
+                        switch ($model->type_id) {
+                            case TypesDocuments::DOCUMENT_TYPE_РАСХОДНАЯ_НАКЛАДНАЯ:
+                                // установим основного покупателя
+                                $model->ca_id = $settings->default_buyer_id;
+                                break;
+                            case TypesDocuments::DOCUMENT_TYPE_АКТ_ВЫПОЛНЕННЫХ_РАБОТ:
+                                if (isset($documentSettings[$action_id]['ca_type_id'])) {
+                                    if ($documentSettings[$action_id]['ca_type_id'] == TypesCounteragents::COUNTERAGENT_TYPE_БРОКЕР_РФ)
+                                        $model->ca_id = $settings->default_broker_ru;
+                                    elseif ($documentSettings[$action_id]['ca_type_id'] == TypesCounteragents::COUNTERAGENT_TYPE_БРОКЕР_ЛНР)
+                                        $model->ca_id = $settings->default_broker_lnr;
+                                }
+                                break;
+                        }
+                    }
                 }
             }
 
@@ -182,9 +210,20 @@ class DocumentsController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
 
-        return $this->redirect(['/documents']);
+        $action_id = null;
+        $ds = $model->getDocumentsListUrlByType();
+        if (is_array($ds)) if (count($ds) == 2) {
+            $action_id = $ds['url'];
+        }
+
+        $model->delete();
+
+        if ($action_id == null)
+            return $this->redirect(['/documents']);
+        else
+            return $this->redirect(['/documents/' . $action_id]);
     }
 
     /**
@@ -258,6 +297,24 @@ class DocumentsController extends Controller
             else
                 throw new NotFoundHttpException('Файл не обнаружен.');
         };
+    }
+
+    /**
+     * Выполняет предварительный показ изображения.
+     * @param $id integer идентификатор файла, который необходимо показать
+     * @return bool
+     */
+    public function actionPreviewFile($id)
+    {
+        $model = DocumentsFiles::findOne($id);
+        if ($model != null) {
+            if ($model->isImage())
+                return \yii\helpers\Html::img(Yii::getAlias('@uploads-docs') . '/' . $model->fn, ['width' => '100%']);
+            else
+                return '<iframe src="http://docs.google.com/gview?url=' . Yii::$app->urlManager->createAbsoluteUrl(['/documents/download-file', 'id' => $id]) . '&embedded=true" style="width:100%; height:600px;" frameborder="0"></iframe>';
+        }
+
+        return false;
     }
 
     /**

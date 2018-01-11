@@ -9,12 +9,10 @@ use backend\components\grid\GridView;
 
 $this->title = 'Пропускаемые записи при импорте из банковской выписки | ' . Yii::$app->name;
 $this->params['breadcrumbs'][] = 'Пропускаемые записи при импорте из банковской выписки';
+
+$this->params['breadcrumbsRight'][] = ['label' => 'Создать', 'icon' => 'fa fa-plus-circle fa-lg', 'url' => ['create'], 'class' => 'btn text-success'];
 ?>
 <div class="skip-bank-records-list">
-    <p>
-        <?= Html::a('<i class="fa fa-plus-circle"></i> Создать', ['create'], ['class' => 'btn btn-success']) ?>
-
-    </p>
     <div class="card">
         <div class="card-block">
             <?= GridView::widget([

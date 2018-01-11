@@ -11,16 +11,21 @@ use backend\components\grid\GridView;
 $this->title = 'Контрагенты | ' . Yii::$app->name;
 $this->params['breadcrumbs'][] = 'Контрагенты';
 
+$this->params['breadcrumbsRight'][] = ['label' => 'Создать', 'icon' => 'fa fa-plus-circle fa-lg', 'url' => ['create'], 'class' => 'btn text-success'];
 $this->params['breadcrumbsRight'][] = ['label' => 'Отбор', 'icon' => 'fa fa-filter', 'url' => '#frmSearch', 'data-target' => '#frmSearch', 'data-toggle' => 'collapse', 'aria-expanded' => $searchApplied === true ? 'true' : 'false', 'aria-controls' => 'frmSearch'];
 $this->params['breadcrumbsRight'][] = ['icon' => 'fa fa-sort-amount-asc', 'url' => ['/counteragents'], 'title' => 'Сбросить отбор и применить сортировку по-умолчанию'];
 ?>
 <div class="counteragents-list">
-    <p>
-        <?= Html::a('<i class="fa fa-plus-circle"></i> Создать', ['create'], ['class' => 'btn btn-success']) ?>
+    <div class="card">
+        <div class="card-block">
+            <p class="mb-0">
+                <?= Html::a('<i class="fa fa-plus-circle"></i> Создать', ['create'], ['class' => 'btn btn-success']) ?>
 
-        <?= Html::a('<i class="fa fa-id-card-o" aria-hidden="true"></i> Единый реестр', ['/counteragents/er'], ['class' => 'btn btn-secondary pull-right']) ?>
+                <?= Html::a('<i class="fa fa-id-card-o" aria-hidden="true"></i> Единый реестр', ['/counteragents/er'], ['class' => 'btn btn-secondary pull-right']) ?>
 
-    </p>
+            </p>
+        </div>
+    </div>
     <?= $this->render('_search', ['model' => $searchModel, 'searchApplied' => $searchApplied]); ?>
 
     <div class="card">

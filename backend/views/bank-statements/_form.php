@@ -4,9 +4,9 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\bootstrap\ActiveForm;
 use yii\web\JsExpression;
+use yii\widgets\MaskedInput;
 use kartik\select2\Select2;
 use kartik\datecontrol\DateControl;
-use kartik\money\MaskMoney;
 use common\models\Periods;
 
 /* @var $this yii\web\View */
@@ -55,9 +55,20 @@ $label_ca_id = $model->attributeLabels()['ca_id'] . ' ' . Html::a('<i class="fa 
                     ])->label($label_ca_id) ?>
 
                 </div>
-                <div class="col-md-2">
-                    <?= $form->field($model, 'bank_amount_dt', ['template' => '{label}<div class="input-group">{input}<span class="input-group-addon"><i class="fa fa-rub" aria-hidden="true"></i></span></div>{error}'])->widget(MaskMoney::className(), [
-                        'options' => ['title' => 'Введите сумму вместе с копейками'],
+                <div class="col-md-3">
+                    <?= $form->field($model, 'bank_amount_dt', [
+                        'template' => '{label}<div class="input-group">{input}<span class="input-group-addon"><i class="fa fa-rub"></i></span></div>{error}'
+                    ])->widget(MaskedInput::className(), [
+                        'clientOptions' => [
+                            'alias' =>  'numeric',
+                            'groupSeparator' => ' ',
+                            'autoUnmask' => true,
+                            'autoGroup' => true,
+                            'removeMaskOnSubmit' => true,
+                        ],
+                    ])->textInput([
+                        'maxlength' => true,
+                        'placeholder' => '0',
                     ])->label('Расход') ?>
 
                 </div>

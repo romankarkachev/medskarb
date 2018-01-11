@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use backend\components\grid\GridView;
+use backend\components\grid\TotalsBankColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\BankStatementsSearch */
@@ -13,16 +14,22 @@ $this->params['breadcrumbs'][] = 'Банковские движения';
 
 $this->params['breadcrumbsRight'][] = ['label' => 'Отбор', 'icon' => 'fa fa-filter', 'url' => '#frmSearch', 'data-target' => '#frmSearch', 'data-toggle' => 'collapse', 'aria-expanded' => $searchApplied === true ? 'true' : 'false', 'aria-controls' => 'frmSearch'];
 $this->params['breadcrumbsRight'][] = ['icon' => 'fa fa-sort-amount-asc', 'url' => ['/bank-statements'], 'title' => 'Сбросить отбор и применить сортировку по-умолчанию'];
+
+$uploadDir = Yii::getAlias('@uploads-bs') . '/';
 ?>
 <div class="bank-statements-list">
-    <p>
-        <?= Html::a('<i class="fa fa-plus"></i> Добавить', ['create'], ['class' => 'btn btn-success']) ?>
+    <div class="card">
+        <div class="card-block">
+            <p class="mb-0">
+                <?= Html::a('<i class="fa fa-plus"></i> Добавить', ['create'], ['class' => 'btn btn-success']) ?>
 
-        <?= Html::a('<i class="fa fa-trash-o" aria-hidden="true"></i> Удалить...', ['clear'], ['class' => 'btn btn-danger pull-right']) ?>
+                <?= Html::a('<i class="fa fa-trash-o" aria-hidden="true"></i> Удалить...', ['clear'], ['class' => 'btn btn-danger pull-right']) ?>
 
-        <?= Html::a('<i class="fa fa-file-excel-o" aria-hidden="true"></i> Импорт из Excel', ['import'], ['class' => 'btn btn-secondary pull-right']) ?>
+                <?= Html::a('<i class="fa fa-file-excel-o" aria-hidden="true"></i> Импорт из Excel', ['import'], ['class' => 'btn btn-secondary pull-right']) ?>
 
-    </p>
+            </p>
+        </div>
+    </div>
     <?= $this->render('_search', ['model' => $searchModel, 'searchApplied' => $searchApplied]); ?>
 
     <div class="card">
@@ -30,13 +37,16 @@ $this->params['breadcrumbsRight'][] = ['icon' => 'fa fa-sort-amount-asc', 'url' 
             <?= GridView::widget([
                 'dataProvider' => $dataProvider,
                 'id' => 'table-statements',
-                'rowOptions'   => function ($model, $key, $index, $grid) {
+                'rowOptions' => function ($model, $key, $index, $grid) {
                     /* @var $model \common\models\BankStatements */
+                    /* @var $column \yii\grid\DataColumn */
+
                     $result['data-id'] = $model->id;
                     $result['data-docrep'] = 'ПП № ' . $model->bank_doc_num . ' от ' . Yii::$app->formatter->asDate($model->bank_date, 'php:d F Y');
                     if ($model->is_active == 0) $result['class'] = 'text-muted';
                     return $result;
                 },
+                'showFooter' => true,
                 'columns' => [
                     [
                         'attribute' => 'bank_date',
@@ -53,11 +63,13 @@ $this->params['breadcrumbsRight'][] = ['icon' => 'fa fa-sort-amount-asc', 'url' 
                         'contentOptions' => ['class' => 'text-center'],
                     ],
                     [
+                        'class' => TotalsBankColumn::className(),
                         'attribute' => 'caName',
                         'format' => 'raw',
-                        'value' => function ($model, $key, $index, $column) {
-                            /** @var \common\models\BankStatements $model */
-                            /** @var \yii\grid\DataColumn $column */
+                        'value' => function ($model, $key, $index, $column) use ($uploadDir) {
+                            /* @var $model \common\models\BankStatements */
+                            /* @var $column \yii\grid\DataColumn */
+
                             $manual = '';
                             if ($model->type == \common\models\BankStatements::TYPE_MANUAL)
                                 $manual = '<i class="fa fa-pencil text-info" aria-hidden="true" title="Добавлено вручную"></i>';
@@ -66,7 +78,21 @@ $this->params['breadcrumbsRight'][] = ['icon' => 'fa fa-sort-amount-asc', 'url' 
                             if ($model->ca_id != null)
                                 $ca_name = '<strong>' . $model->caName . '</strong> ';
 
-                            return $ca_name.$manual;
+                            $files = explode(\common\models\BankStatementsSearch::FILES_DELIMITER, $model->filesDetails);
+                            $filesDetails = '';
+                            if ($model->filesCount > 0) {
+                                // реально берется только первое изображение
+                                // если когда-нибудь будут с этим проблемы, то подумать, как сделать, чтобы по щелчку
+                                // по камере отображалось первое изображение в этой группе
+                                $filesDetails = ' ' . Html::a('<i class="fa fa-camera" aria-hidden="true"></i>', $uploadDir . $files[0], [
+                                    'rel' => 'fancybox',
+                                    'title' => 'Чек № ' . $model->bank_doc_num .
+                                        ' от ' . Yii::$app->formatter->asDate($model->bank_date, 'php:d.m.Y') .
+                                        ' на сумму ' . Yii::$app->formatter->asCurrency($model->bank_amount_dt != null ? $model->bank_amount_dt : $model->bank_amount_kt),
+                                ]);
+                            }
+
+                            return $ca_name . $manual . $filesDetails;
                         },
                     ],
                     [
@@ -78,8 +104,9 @@ $this->params['breadcrumbsRight'][] = ['icon' => 'fa fa-sort-amount-asc', 'url' 
                     [
                         'label' => 'Сумма',
                         'contentOptions' => function ($model, $key, $index, $column) {
-                            /** @var \common\models\BankStatements $model */
-                            /** @var \yii\grid\DataColumn $column */
+                            /* @var $model \common\models\BankStatements */
+                            /* @var $column \yii\grid\DataColumn */
+
                             if ($model->bank_amount_dt == null || $model->bank_amount_dt == 0)
                                 return ['class' => 'text-success text-right'];
                             else
@@ -118,6 +145,42 @@ $this->params['breadcrumbsRight'][] = ['icon' => 'fa fa-sort-amount-asc', 'url' 
         </div>
     </div>
 </div>
+<?= \newerton\fancybox\FancyBox::widget([
+    'target' => 'a[rel^="fancybox"]',
+    'helpers' => true,
+    'mouse' => true,
+    'config' => [
+        'maxWidth' => '90%',
+        'maxHeight' => '90%',
+        'playSpeed' => 4000,
+        'padding' => 0,
+        'fitToView' => false,
+        'width' => '70%',
+        'height' => '70%',
+        'autoSize' => false,
+        'closeClick' => false,
+        'openEffect' => 'elastic',
+        'closeEffect' => 'elastic',
+        'prevEffect' => 'elastic',
+        'nextEffect' => 'elastic',
+        'closeBtn' => false,
+        'openOpacity' => true,
+        'helpers' => [
+            'title' => ['type' => 'float'],
+            'buttons' => [],
+            'thumbs' => ['width' => 68, 'height' => 50],
+            'overlay' => [
+                'css' => [
+                    'background' => 'rgba(0, 0, 0, 0.8)'
+                ],
+                // ура! гадость наконец исправлена!
+                // чтобы не прокручивалось вверх при щелчке по изображению, делаем так:
+                'locked' => false,
+            ]
+        ],
+    ]
+]); ?>
+
 <?php
 $url = \yii\helpers\Url::to(['/bank-statements/summary-card']);
 $this->registerJs(<<<JS

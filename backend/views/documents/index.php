@@ -21,18 +21,11 @@ else {
     $this->params['breadcrumbs'][] = $final_bc;
 }
 
+$this->params['breadcrumbsRight'][] = ['label' => 'Создать', 'icon' => 'fa fa-plus-circle fa-lg', 'url' => ['create'], 'class' => 'btn text-success', 'data-params' => ['type_id' => $type_id, 'action_id' => $action_id], 'data-method' => 'post'];
 $this->params['breadcrumbsRight'][] = ['label' => 'Отбор', 'icon' => 'fa fa-filter', 'url' => '#frmSearch', 'data-target' => '#frmSearch', 'data-toggle' => 'collapse', 'aria-expanded' => $searchApplied === true ? 'true' : 'false', 'aria-controls' => 'frmSearch'];
 $this->params['breadcrumbsRight'][] = ['icon' => 'fa fa-sort-amount-asc', 'url' => ['/documents/' . $action_id], 'title' => 'Сбросить отбор и применить сортировку по-умолчанию'];
 ?>
 <div class="documents-list">
-    <p>
-        <?= Html::a('<i class="fa fa-plus-circle"></i> Создать', ['create'], [
-            'class' => 'btn btn-success',
-            'data-params' => ['type_id' => $type_id, 'action_id' => $action_id],
-            'data-method' => 'post',
-        ]) ?>
-
-    </p>
     <?= $this->render('_search', [
         'model' => $searchModel,
         'searchApplied' => $searchApplied,
@@ -59,6 +52,11 @@ $this->params['breadcrumbsRight'][] = ['icon' => 'fa fa-sort-amount-asc', 'url' 
                     [
                         'attribute' => 'amount',
                         'format' => ['decimal', 'decimals' => 2],
+                    ],
+                    [
+                        'attribute' => 'filesCount',
+                        'headerOptions' => ['class' => 'text-center'],
+                        'contentOptions' => ['class' => 'text-center'],
                     ],
                     ['class' => 'backend\components\grid\ActionColumn'],
                 ],

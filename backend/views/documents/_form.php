@@ -2,11 +2,11 @@
 
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\web\JsExpression;
 use yii\bootstrap\ActiveForm;
+use yii\web\JsExpression;
+use yii\widgets\MaskedInput;
 use kartik\select2\Select2;
 use kartik\datecontrol\DateControl;
-use kartik\money\MaskMoney;
 use common\models\Deals;
 use common\models\TypesDocuments;
 use common\models\TypesCounteragents;
@@ -95,8 +95,9 @@ if ($model->ca != null)
                 <div class="col-md-4">
                     <label class="control-label" for="documents-amount_used">Использовано средств по договору *</label>
                     <p>
-                        <strong><?= Yii::$app->formatter->asDecimal($model->amountUsed, 2) ?></strong> из <strong><?= Yii::$app->formatter->asDecimal(floatval($model->amount), 2) ?></strong>.
-
+                        <strong><?= Yii::$app->formatter->asDecimal($model->amountUsed, 2) ?></strong> из
+                        <strong><?= Yii::$app->formatter->asDecimal(floatval($model->amount), 2) ?></strong>
+                        <small title="Свободный по договору остаток">(<?= Yii::$app->formatter->asDecimal(floatval($model->amount) - $model->amountUsed, 2) ?>)</small>.
                     </p>
                 </div>
                 <?php endif; ?>
@@ -106,7 +107,7 @@ if ($model->ca != null)
                     <?= $form->field($model, 'doc_num')->textInput(['maxlength' => true, 'placeholder' => 'Введите номер']) ?>
 
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <?= $form->field($model, 'doc_date')->widget(DateControl::className(), [
                         'value' => $model->doc_date,
                         'type' => DateControl::FORMAT_DATE,
@@ -127,9 +128,20 @@ if ($model->ca != null)
                     ]) ?>
 
                 </div>
-                <div class="col-md-2">
-                    <?= $form->field($model, 'amount', ['template' => '{label}<div class="input-group">{input}<span class="input-group-addon"><i class="fa fa-rub" aria-hidden="true"></i></span></div>{error}'])->widget(MaskMoney::className(), [
-                        'options' => ['title' => 'Введите сумму вместе с копейками'],
+                <div class="col-md-3">
+                    <?= $form->field($model, 'amount', [
+                        'template' => '{label}<div class="input-group">{input}<span class="input-group-addon"><i class="fa fa-rub"></i></span></div>{error}'
+                    ])->widget(MaskedInput::className(), [
+                        'clientOptions' => [
+                            'alias' =>  'numeric',
+                            'groupSeparator' => ' ',
+                            'autoUnmask' => true,
+                            'autoGroup' => true,
+                            'removeMaskOnSubmit' => true,
+                        ],
+                    ])->textInput([
+                        'maxlength' => true,
+                        'placeholder' => '0',
                     ]) ?>
 
                 </div>

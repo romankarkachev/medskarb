@@ -17,6 +17,7 @@ use yii\db\ActiveRecord;
  * @property string $diff
  * @property string $rate
  * @property string $amount
+ * @property string $amount_fact
  * @property string $min
  * @property string $comment
  *
@@ -44,7 +45,7 @@ class TaxCalculations extends \yii\db\ActiveRecord
         return [
             [['period_id', 'dt', 'kt', 'diff', 'rate', 'amount', 'min'], 'required'],
             [['calculated_at', 'calculated_by', 'period_id'], 'integer'],
-            [['dt', 'kt', 'diff', 'rate', 'amount', 'min'], 'number'],
+            [['dt', 'kt', 'diff', 'rate', 'amount', 'amount_fact', 'min'], 'number'],
             [['comment'], 'string'],
             [['calculated_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['calculated_by' => 'id']],
             [['period_id'], 'exist', 'skipOnError' => true, 'targetClass' => Periods::className(), 'targetAttribute' => ['period_id' => 'id']],
@@ -66,6 +67,7 @@ class TaxCalculations extends \yii\db\ActiveRecord
             'diff' => 'Разница',
             'rate' => 'Ставка налога',
             'amount' => 'Сумма налога',
+            'amount_fact' => 'Сумма налога, уплаченная по факту',
             'min' => 'Минимальный налог',
             'comment' => 'Примечание',
             // для сортировки

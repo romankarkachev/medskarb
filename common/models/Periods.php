@@ -13,6 +13,7 @@ use yii\helpers\ArrayHelper;
  * @property integer $start
  * @property integer $end
  * @property integer $quarter_num
+ * @property integer $year
  *
  * @property BankStatements[] $bankStatements
  * @property TaxCalculations[] $taxCalculations
@@ -41,7 +42,7 @@ class Periods extends \yii\db\ActiveRecord
     {
         return [
             [['name', 'temp_start', 'temp_end'], 'required'],
-            [['start', 'end', 'quarter_num'], 'integer'],
+            [['start', 'end', 'quarter_num', 'year'], 'integer'],
             [['name'], 'string', 'max' => 50],
             [['temp_start', 'temp_end'], 'safe'],
         ];
@@ -58,6 +59,7 @@ class Periods extends \yii\db\ActiveRecord
             'start' => 'Начало периода',
             'end' => 'Конец периода',
             'quarter_num' => 'Номер квартала',
+            'year' => 'Номер года',
             'temp_start' => 'Начало периода',
             'temp_end' => 'Конец периода',
         ];

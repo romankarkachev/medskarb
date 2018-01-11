@@ -1,6 +1,7 @@
 <?php
 
 use backend\components\grid\GridView;
+use backend\components\grid\TotalsBankColumn;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -10,14 +11,15 @@ use backend\components\grid\GridView;
         <div class="card-block">
             <?= GridView::widget([
                 'dataProvider' => $dataProvider,
-                'id' => 'table-statements',
                 'rowOptions'   => function ($model, $key, $index, $grid) {
                     /* @var $model \common\models\BankStatements */
-                    $result['data-id'] = $model->id;
-                    $result['data-docrep'] = 'ПП № ' . $model->bank_doc_num . ' от ' . Yii::$app->formatter->asDate($model->bank_date, 'php:d F Y');
+                    /* @var \yii\grid\DataColumn $column */
+
+                    $result = [];
                     if ($model->is_active == 0) $result['class'] = 'text-muted';
                     return $result;
                 },
+                'showFooter' => true,
                 'columns' => [
                     [
                         'attribute' => 'bank_date',
@@ -34,11 +36,13 @@ use backend\components\grid\GridView;
                         'contentOptions' => ['class' => 'text-center'],
                     ],
                     [
+                        'class' => TotalsBankColumn::className(),
                         'attribute' => 'caName',
                         'format' => 'raw',
                         'value' => function ($model, $key, $index, $column) {
-                            /** @var \common\models\BankStatements $model */
-                            /** @var \yii\grid\DataColumn $column */
+                            /* @var \common\models\BankStatements $model */
+                            /* @var \yii\grid\DataColumn $column */
+
                             $manual = '';
                             if ($model->type == \common\models\BankStatements::TYPE_MANUAL)
                                 $manual = '<i class="fa fa-pencil text-info" aria-hidden="true" title="Добавлено вручную"></i>';
@@ -47,7 +51,7 @@ use backend\components\grid\GridView;
                             if ($model->ca_id != null)
                                 $ca_name = '<strong>' . $model->caName . '</strong> ';
 
-                            return $ca_name.$manual;
+                            return $ca_name . $manual;
                         },
                     ],
                     [
@@ -59,16 +63,18 @@ use backend\components\grid\GridView;
                     [
                         'label' => 'Сумма',
                         'contentOptions' => function ($model, $key, $index, $column) {
-                            /** @var \common\models\BankStatements $model */
-                            /** @var \yii\grid\DataColumn $column */
+                            /* @var \common\models\BankStatements $model */
+                            /* @var \yii\grid\DataColumn $column */
+
                             if ($model->bank_amount_dt == null || $model->bank_amount_dt == 0)
                                 return ['class' => 'text-success text-right'];
                             else
                                 return ['class' => 'text-danger text-right'];
                         },
                         'value' => function ($model, $key, $index, $column) {
-                            /** @var \common\models\BankStatements $model */
-                            /** @var \yii\grid\DataColumn $column */
+                            /* @var \common\models\BankStatements $model */
+                            /* @var \yii\grid\DataColumn $column */
+
                             if ($model->bank_amount_dt == null || $model->bank_amount_dt == 0)
                                 return '+' . Yii::$app->formatter->asDecimal($model->bank_amount_kt, 2);
                             else

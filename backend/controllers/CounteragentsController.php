@@ -30,17 +30,17 @@ class CounteragentsController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => [
-                    'index', 'create', 'update', 'delete', 'summary-card', 'er',
-                    'render-counteragents-info', 'render-ambiguous-counteragents-info',
-                    'fetch-bank-by-bik', 'fetch-counteragents-info-by-inn-orgn',
-                    'list-for-document', 'list-of-customers', 'list-of-brokers-ru', 'list-of-brokers-lnr',
-                    'upload-files', 'download', 'delete-file'
-                ],
                 'rules' => [
                     [
+                        'actions' => [
+                            'index', 'create', 'update', 'delete', 'summary-card', 'er',
+                            'render-counteragents-info', 'render-ambiguous-counteragents-info',
+                            'fetch-bank-by-bik', 'fetch-counteragents-info-by-inn-orgn',
+                            'list-for-document', 'list-of-customers', 'list-of-brokers-ru', 'list-of-brokers-lnr',
+                            'upload-files', 'download', 'delete-file'
+                        ],
                         'allow' => true,
-                        'roles' => ['root'],
+                        'roles' => ['@'],
                     ],
                 ],
             ],

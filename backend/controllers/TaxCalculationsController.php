@@ -24,11 +24,11 @@ class TaxCalculationsController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['index', 'create', 'update', 'delete', 'render-calculations'],
                 'rules' => [
                     [
+                        'actions' => ['index', 'create', 'update', 'delete', 'render-calculations'],
                         'allow' => true,
-                        'roles' => ['root'],
+                        'roles' => ['@'],
                     ],
                 ],
             ],

@@ -18,6 +18,18 @@ a.desc:after {
     content: "\f15e";
 }
 
+/* ссылки с подчеркиванием */
+a.link-ajax {
+    text-decoration: none !important;
+    border-bottom: 1px dashed #20a8d8 !important;
+}
+
+a.link-ajax:hover {
+    text-decoration: none !important;
+    color: #f00000 !important;
+}
+/* -- */
+
 .app-body {
     display: block !important;
 }
@@ -72,4 +84,9 @@ a.desc:after {
 
 .table td {
     padding: 0.4rem !important;
+}
+
+/* этот цвет более приемлем для полей с addon group */
+.input-group-addon {
+    background-color: #f0f3f5 !important;
 }
