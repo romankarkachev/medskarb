@@ -182,7 +182,12 @@ class TaxYearCalculations extends \yii\db\ActiveRecord
 
         // Пенсионный Фонд
         $this->pf_base = $this->kt;
-        $this->pf_amount = round($this->pf_base * $this->pf_rate / 100);
+        if ($this->pf_base > $this->pf_limit){
+            $this->pf_amount = round(($this->pf_base - $this->pf_limit) * $this->pf_rate / 100);
+        }
+        else {
+            $this->pf_amount = 0;
+        }
 
         // попытаемся вычислить крайний срок оплаты
         try {

@@ -43,11 +43,39 @@ class TaxYearCalculationsSearch extends TaxYearCalculations
     public function search($params)
     {
         $query = TaxYearCalculations::find();
-
-        // add conditions that should always apply here
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'pagination' => [
+                'pageSize' => 50,
+                'route' => 'tax-year-calculations',
+            ],
+            'sort' => [
+                'route' => 'tax-year-calculations',
+                'defaultOrder' => ['year' => SORT_DESC],
+                'attributes' => [
+                    'id',
+                    'calculated_at',
+                    'calculated_by',
+                    'year',
+                    'kt',
+                    'dt',
+                    'base',
+                    'rate',
+                    'min',
+                    'amount',
+                    'amount_fact',
+                    'amount_to_pay',
+                    'declared_at',
+                    'paid_at',
+                    'pf_base',
+                    'pf_limit',
+                    'pf_rate',
+                    'pf_amount',
+                    'pf_paid_at',
+                    'calculation_details',
+                    'comment'
+                ],
+            ],
         ]);
 
         $this->load($params);

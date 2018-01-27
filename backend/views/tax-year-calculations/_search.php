@@ -39,7 +39,7 @@ use yii\widgets\MaskedInput;
             <div class="form-group">
                 <?= Html::submitButton('Выполнить', ['class' => 'btn btn-info']) ?>
 
-                <?= Html::a('Отключить отбор', ['/tax-quarter-calculations'], ['class' => 'btn btn-secondary']) ?>
+                <?= Html::a('Отключить отбор', ['/tax-year-calculations'], ['class' => 'btn btn-secondary']) ?>
 
             </div>
         </div>

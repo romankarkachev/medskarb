@@ -58,6 +58,22 @@ $formNameId = strtolower($model->formName());
 
 </div>
 <?php
+$this->registerJs(<<<JS
+// Функция-обработчик изменения даты в любом из соответствующих полей.
+//
+function anyDateOnChange() {
+    \$button = $("button[type='submit']");
+    \$button.attr("disabled", "disabled");
+    text = \$button.html();
+    \$button.text("Подождите...");
+    setTimeout(function () {
+        \$button.removeAttr("disabled");
+        \$button.html(text);
+    }, 1500);
+}
+JS
+, \yii\web\View::POS_BEGIN);
+
 $url_reload_calculations = Url::to(['/tax-year-calculations/render-calculations']);
 $this->registerJs(<<<JS
 function CalculateTaxAmount() {

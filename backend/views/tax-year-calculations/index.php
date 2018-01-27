@@ -12,7 +12,7 @@ $this->params['breadcrumbs'][] = 'Расчеты годовых платежей
 
 $this->params['breadcrumbsRight'][] = ['label' => 'Создать', 'icon' => 'fa fa-plus-circle fa-lg', 'url' => ['create'], 'class' => 'btn text-success'];
 $this->params['breadcrumbsRight'][] = ['label' => 'Отбор', 'icon' => 'fa fa-filter', 'url' => '#frmSearch', 'data-target' => '#frmSearch', 'data-toggle' => 'collapse', 'aria-expanded' => $searchApplied === true ? 'true' : 'false', 'aria-controls' => 'frmSearch'];
-$this->params['breadcrumbsRight'][] = ['icon' => 'fa fa-sort-amount-asc', 'url' => ['/tax-quarter-calculations'], 'title' => 'Сбросить отбор и применить сортировку по-умолчанию'];
+$this->params['breadcrumbsRight'][] = ['icon' => 'fa fa-sort-amount-asc', 'url' => ['/tax-year-calculations'], 'title' => 'Сбросить отбор и применить сортировку по-умолчанию'];
 ?>
 <div class="tax-year-calculations-list">
     <?= $this->render('_search', ['model' => $searchModel, 'searchApplied' => $searchApplied]); ?>
