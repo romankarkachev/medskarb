@@ -2,18 +2,18 @@
 
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
-use kartik\select2\Select2;
-use common\models\Periods;
+use yii\widgets\MaskedInput;
 
 /* @var $this yii\web\View */
-/* @var $model common\models\TaxCalculationsSearch */
-/* @var $form yii\bootstrap\ActiveForm */
+/* @var $model common\models\TaxYearCalculationsSearch */
+/* @var $form yii\widgets\ActiveForm */
 /* @var $searchApplied bool */
 ?>
 
-<div class="tax-calculations-search">
+<div class="tax-year-calculations-search">
+
     <?php $form = ActiveForm::begin([
-        'action' => ['/tax-calculations'],
+        'action' => ['/tax-year-calculations'],
         'method' => 'get',
         'options' => [
             'id' => 'frmSearch',
@@ -26,13 +26,12 @@ use common\models\Periods;
         <div class="card-header card-header-info card-header-inverse"><i class="fa fa-filter"></i> Форма отбора</div>
         <div class="card-block">
             <div class="row">
-                <div class="col-md-2">
-                    <?= $form->field($model, 'period_id')->widget(Select2::className(), [
-                        'data' => Periods::arrayMapForSelect2(),
-                        'theme' => Select2::THEME_BOOTSTRAP,
-                        'options' => ['placeholder' => '- выберите -'],
-                        'hideSearch' => true,
-                        'pluginOptions' => ['allowClear' => true],
+                <div class="col-auto">
+                    <?= $form->field($model, 'year')->widget(MaskedInput::className(), [
+                        'clientOptions' => ['alias' =>  'numeric'],
+                    ])->textInput([
+                        'maxlength' => true,
+                        'placeholder' => '0',
                     ]) ?>
 
                 </div>
@@ -40,7 +39,7 @@ use common\models\Periods;
             <div class="form-group">
                 <?= Html::submitButton('Выполнить', ['class' => 'btn btn-info']) ?>
 
-                <?= Html::a('Отключить отбор', ['/tax-calculations'], ['class' => 'btn btn-secondary']) ?>
+                <?= Html::a('Отключить отбор', ['/tax-quarter-calculations'], ['class' => 'btn btn-secondary']) ?>
 
             </div>
         </div>

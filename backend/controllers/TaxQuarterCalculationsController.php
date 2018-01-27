@@ -3,8 +3,8 @@
 namespace backend\controllers;
 
 use Yii;
-use common\models\TaxCalculations;
-use common\models\TaxCalculationsSearch;
+use common\models\TaxQuarterCalculations;
+use common\models\TaxQuarterCalculationsSearch;
 use common\models\Periods;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -12,9 +12,9 @@ use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 
 /**
- * TaxCalculationsController implements the CRUD actions for TaxCalculations model.
+ * TaxQuarterCalculationsController implements the CRUD actions for TaxQuarterCalculations model.
  */
-class TaxCalculationsController extends Controller
+class TaxQuarterCalculationsController extends Controller
 {
     /**
      * @inheritdoc
@@ -42,12 +42,12 @@ class TaxCalculationsController extends Controller
     }
 
     /**
-     * Lists all TaxCalculations models.
+     * Lists all TaxQuarterCalculations models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new TaxCalculationsSearch();
+        $searchModel = new TaxQuarterCalculationsSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         $searchApplied = Yii::$app->request->get($searchModel->formName()) != null;
@@ -60,29 +60,29 @@ class TaxCalculationsController extends Controller
     }
 
     /**
-     * Creates a new TaxCalculations model.
+     * Creates a new TaxQuarterCalculations model.
      * If creation is successful, the browser will be redirected to the 'index' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new TaxCalculations();
+        $model = new TaxQuarterCalculations();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['/tax-calculations', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post())) {
+            if ($model->save()) return $this->redirect(['/tax-quarter-calculations', 'id' => $model->id]);
         } else {
             $period = Periods::getCurrentPeriod();
             $model->calculateTaxAmountByPeriod($period);
             $model->period_id = $period->id;
-
-            return $this->render('create', [
-                'model' => $model,
-            ]);
         }
+
+        return $this->render('create', [
+            'model' => $model,
+        ]);
     }
 
     /**
-     * Updates an existing TaxCalculations model.
+     * Updates an existing TaxQuarterCalculations model.
      * If update is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -92,7 +92,7 @@ class TaxCalculationsController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['/tax-calculations']);
+            return $this->redirect(['/tax-quarter-calculations']);
         } else {
             return $this->render('update', [
                 'model' => $model,
@@ -101,7 +101,7 @@ class TaxCalculationsController extends Controller
     }
 
     /**
-     * Deletes an existing TaxCalculations model.
+     * Deletes an existing TaxQuarterCalculations model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -110,30 +110,40 @@ class TaxCalculationsController extends Controller
     {
         $this->findModel($id)->delete();
 
-        return $this->redirect(['/tax-calculations']);
+        return $this->redirect(['/tax-quarter-calculations']);
     }
 
     /**
-     * Finds the TaxCalculations model based on its primary key value.
+     * Finds the TaxQuarterCalculations model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return TaxCalculations the loaded model
+     * @return TaxQuarterCalculations the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = TaxCalculations::findOne($id)) !== null) {
+        if (($model = TaxQuarterCalculations::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('Запрошенная страница не существует.');
         }
     }
 
+    /**
+     * Рендерит поля с расчетами налога за период, переданный в параметрах.
+     * @param $period_id integer идентификатор периода
+     * @return mixed
+     */
     public function actionRenderCalculations($period_id)
     {
-        $model = new TaxCalculations();
-        $model->calculateTaxAmountByPeriod(\common\models\Periods::findOne($period_id));
+        if (Yii::$app->request->isAjax && intval($period_id) > 0) {
+            $model = new TaxQuarterCalculations();
+            $model->period_id = $period_id;
+            $model->calculateTaxAmountByPeriod(Periods::findOne($period_id));
 
-        return $this->renderAjax('_calculations', ['model' => $model, 'form' => new \yii\bootstrap\ActiveForm()]);
+            return $this->renderAjax('_calculations', ['model' => $model, 'form' => new \yii\bootstrap\ActiveForm()]);
+        }
+
+        return false;
     }
 }

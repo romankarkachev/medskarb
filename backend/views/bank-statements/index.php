@@ -8,6 +8,7 @@ use backend\components\grid\TotalsBankColumn;
 /* @var $searchModel common\models\BankStatementsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $searchApplied bool */
+/* @var $tax_inspection_id integer идентификатор налоговой инспекции */
 
 $this->title = 'Банковские движения | ' . Yii::$app->name;
 $this->params['breadcrumbs'][] = 'Банковские движения';
@@ -16,6 +17,8 @@ $this->params['breadcrumbsRight'][] = ['label' => 'Отбор', 'icon' => 'fa fa
 $this->params['breadcrumbsRight'][] = ['icon' => 'fa fa-sort-amount-asc', 'url' => ['/bank-statements'], 'title' => 'Сбросить отбор и применить сортировку по-умолчанию'];
 
 $uploadDir = Yii::getAlias('@uploads-bs') . '/';
+
+if (!isset($tax_inspection_id)) $tax_inspection_id = null;
 ?>
 <div class="bank-statements-list">
     <div class="card">
@@ -66,7 +69,7 @@ $uploadDir = Yii::getAlias('@uploads-bs') . '/';
                         'class' => TotalsBankColumn::className(),
                         'attribute' => 'caName',
                         'format' => 'raw',
-                        'value' => function ($model, $key, $index, $column) use ($uploadDir) {
+                        'value' => function ($model, $key, $index, $column) use ($uploadDir, $tax_inspection_id) {
                             /* @var $model \common\models\BankStatements */
                             /* @var $column \yii\grid\DataColumn */
 
@@ -75,8 +78,11 @@ $uploadDir = Yii::getAlias('@uploads-bs') . '/';
                                 $manual = '<i class="fa fa-pencil text-info" aria-hidden="true" title="Добавлено вручную"></i>';
 
                             $ca_name = '<em>' . $model->bank_description . '</em> ';
-                            if ($model->ca_id != null)
+                            if ($model->ca_id != null) {
                                 $ca_name = '<strong>' . $model->caName . '</strong> ';
+                                if ($tax_inspection_id != null && $tax_inspection_id == $model->ca_id)
+                                    $ca_name .= '<p class="mb-0"><em>' . $model->bank_description . '</em></p>';
+                            }
 
                             $files = explode(\common\models\BankStatementsSearch::FILES_DELIMITER, $model->filesDetails);
                             $filesDetails = '';

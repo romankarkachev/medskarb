@@ -6,6 +6,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\BankStatements;
+use yii\helpers\ArrayHelper;
 
 /**
  * BankStatementsSearch represents the model behind the search form about `common\models\BankStatements`.
@@ -16,6 +17,12 @@ class BankStatementsSearch extends BankStatements
      * Разделитель имен файлов для присоединяемого запроса.
      */
     const FILES_DELIMITER = '|';
+
+    /**
+     * Поле отбора, определяющее период (в том числе год).
+     * @var string
+     */
+    public $searchPeriod;
 
     /**
      * Поле отбора, определяющее начало периода даты движения.
@@ -35,7 +42,7 @@ class BankStatementsSearch extends BankStatements
     public function rules()
     {
         return [
-            [['id', 'created_at', 'created_by', 'period_id', 'type', 'ca_id', 'is_active'], 'integer'],
+            [['id', 'created_at', 'created_by', 'period_id', 'type', 'ca_id', 'is_active', 'searchPeriod'], 'integer'],
             [['bank_date', 'bank_dt', 'bank_kt', 'bank_bik_name', 'bank_doc_num', 'bank_description', 'inn'], 'safe'],
             [['bank_amount_dt', 'bank_amount_kt'], 'number'],
             // для отбора
@@ -48,12 +55,11 @@ class BankStatementsSearch extends BankStatements
      */
     public function attributeLabels()
     {
-        $labels = parent::attributeLabels();
-
-        $labels['searchDateStart'] = 'Дата платежа с';
-        $labels['searchDateEnd'] = 'По';
-
-        return $labels;
+        return ArrayHelper::merge(parent::attributeLabels(), [
+            'searchDateStart' => 'Дата платежа с',
+            'searchDateEnd' => 'По',
+            'searchPeriod' => 'Период',
+        ]);
     }
 
     /**
@@ -142,7 +148,6 @@ class BankStatementsSearch extends BankStatements
             'id' => $this->id,
             'created_at' => $this->created_at,
             'created_by' => $this->created_by,
-            'period_id' => $this->period_id,
             'type' => $this->type,
             'ca_id' => $this->ca_id,
             'is_active' => $this->is_active,
@@ -150,6 +155,24 @@ class BankStatementsSearch extends BankStatements
             'bank_amount_dt' => $this->bank_amount_dt,
             'bank_amount_kt' => $this->bank_amount_kt,
         ]);
+
+        // проверим, выбран ли период
+        if ($this->searchPeriod != null)
+            if ($this->searchPeriod > 2000)
+                // выбран год
+                $query->andFilterWhere([
+                    'periods.year' => $this->searchPeriod,
+                ]);
+            else
+                // выбран конкретный период
+                $query->andFilterWhere([
+                    'period_id' => $this->searchPeriod,
+                ]);
+        else
+            // выбран конкретный период
+            $query->andFilterWhere([
+                'period_id' => $this->period_id,
+            ]);
 
         if ($this->searchDateStart !== null or $this->searchDateEnd !== null)
             if ($this->searchDateStart !== '' && $this->searchDateEnd !== '') {

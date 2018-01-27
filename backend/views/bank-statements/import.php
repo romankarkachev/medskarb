@@ -52,7 +52,7 @@ $this->params['breadcrumbs'][] = 'Импорт';
             <div class="form-group">
                 <?= Html::a('<i class="fa fa-arrow-left" aria-hidden="true"></i> Банковские движения', ['/bank-statements'], ['class' => 'btn btn-lg', 'title' => 'Вернуться в список. Изменения не будут сохранены']) ?>
 
-                <?= Html::submitButton('<i class="fa fa-cloud-upload" aria-hidden="true"></i> Выполнить', ['class' => 'btn btn-success btn-lg']) ?>
+                <?= Html::submitButton('<i class="fa fa-cloud-download" aria-hidden="true"></i> Выполнить', ['class' => 'btn btn-success btn-lg']) ?>
 
             </div>
             <?php ActiveForm::end() ?>

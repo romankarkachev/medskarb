@@ -5,7 +5,7 @@ use yii\bootstrap\ActiveForm;
 use kartik\money\MaskMoney;
 
 /* @var $this yii\web\View */
-/* @var $model common\models\TaxCalculations */
+/* @var $model common\models\TaxQuarterCalculations */
 /* @var $form yii\bootstrap\ActiveForm */
 ?>
 <div class="col-md-6">

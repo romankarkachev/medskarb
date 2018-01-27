@@ -30,11 +30,10 @@ use common\models\Periods;
         <div class="card-block">
             <div class="row">
                 <div class="col-md-2">
-                    <?= $form->field($model, 'period_id')->widget(Select2::className(), [
-                        'data' => Periods::arrayMapForSelect2(),
+                    <?= $form->field($model, 'searchPeriod')->widget(Select2::className(), [
+                        'data' => Periods::arrayMapForSelect2(true),
                         'theme' => Select2::THEME_BOOTSTRAP,
                         'options' => ['placeholder' => '- выберите -'],
-                        'hideSearch' => true,
                         'pluginOptions' => ['allowClear' => true],
                     ]) ?>
 

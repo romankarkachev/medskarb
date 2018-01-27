@@ -102,8 +102,10 @@ class User extends BaseUser
                 ['label' => 'Договоры', 'icon' => 'fa fa-folder-open', 'url' => ['/documents/contracts']],
                 ['label' => 'Все', 'icon' => 'fa fa-folder-open', 'url' => ['/documents']],
                 ['label' => '<li class="nav-title">Налогообложение</li>'],
+                ['label' => 'Календарь', 'icon' => 'fa fa-calendar', 'url' => ['/accountant-calendar']],
                 ['label' => 'Банковские движения', 'icon' => 'fa fa-bank', 'url' => ['/bank-statements']],
-                ['label' => 'Расчеты налога', 'icon' => 'fa fa-balance-scale', 'url' => ['/tax-calculations']],
+                ['label' => 'Авансовые платежи', 'icon' => 'fa fa-balance-scale', 'url' => ['/tax-quarter-calculations']],
+                ['label' => 'Расчеты налога', 'icon' => 'fa fa-balance-scale', 'url' => ['/tax-year-calculations']],
                 [
                     'label' => 'Справочники',
                     'url' => '#',
@@ -121,7 +123,8 @@ class User extends BaseUser
                 ['label' => 'Контрагенты', 'icon' => 'fa fa-address-book-o', 'url' => ['/counteragents']],
                 ['label' => '<li class="nav-title">Налогообложение</li>'],
                 ['label' => 'Банковские движения', 'icon' => 'fa fa-bank', 'url' => ['/bank-statements']],
-                ['label' => 'Расчеты налога', 'icon' => 'fa fa-balance-scale', 'url' => ['/tax-calculations']],
+                ['label' => 'Авансовые платежи', 'icon' => 'fa fa-balance-scale', 'url' => ['/tax-quarter-calculations']],
+                ['label' => 'Расчеты налога', 'icon' => 'fa fa-balance-scale', 'url' => ['/tax-year-calculations']],
             ];
 
         return [];

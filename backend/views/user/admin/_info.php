@@ -2,7 +2,6 @@
 
 /* @var $this yii\web\View */
 /* @var $user common\models\User */
-/* @var $dpFinances yii\data\ActiveDataProvider */
 ?>
 
 <?php $this->beginContent('@backend/views/user/admin/update.php', ['user' => $user]) ?>

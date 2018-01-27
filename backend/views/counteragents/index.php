@@ -49,6 +49,8 @@ $this->params['breadcrumbsRight'][] = ['icon' => 'fa fa-sort-amount-asc', 'url' 
                             return Html::a($model->name, ['/counteragents/update', 'id' => $model->id]);
                         },
                     ],
+                    'inn',
+                    'ogrn',
                     'phones',
                     [
                         'attribute' => 'contractRep',

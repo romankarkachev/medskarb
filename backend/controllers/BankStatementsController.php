@@ -3,6 +3,7 @@
 namespace backend\controllers;
 
 use backend\models\BankStatementsClear;
+use common\models\Settings;
 use Yii;
 use common\models\BankStatements;
 use common\models\BankStatementsSearch;
@@ -72,18 +73,24 @@ class BankStatementsController extends Controller
             $period = Periods::getCurrentPeriod();
             if ($period != null) $period_param = [
                 $searchModel->formName() => [
-                    'period_id' => $period->id
+                    'searchPeriod' => $period->id
                 ]
             ];
         }
 
         $dataProvider = $searchModel->search(ArrayHelper::merge($period_param, Yii::$app->request->queryParams));
 
-        return $this->render('index', [
+        $vars = [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'searchApplied' => $searchApplied,
-        ]);
+        ];
+
+        // определим налоговую инспекцию, чтобы выделять движения по ней в списке
+        $settings = Settings::findOne(1);
+        if ($settings != null && $settings->tax_inspection_id != null) $vars['tax_inspection_id'] = $settings->tax_inspection_id;
+
+        return $this->render('index', $vars);
     }
 
     /**
@@ -249,7 +256,7 @@ class BankStatementsController extends Controller
                     ]);
                 }
                 catch (\Exception $exception) {
-                    Yii::$app->session->setFlash('error', $exception);
+                    Yii::$app->session->setFlash('error', $exception->getMessage() . '<p>Попробуйте разблокировать файл (кнопка Разрешить редактирование и Сохранить) или же пересохранить файл в формате XLS.</p>');
                 }
 
                 if (isset($data) && count($data) > 0) {

@@ -13,7 +13,7 @@ use yii\bootstrap\ActiveForm;
 
     <div class="card">
         <div class="card-block">
-            <?= $form->field($model, 'substring')->textarea(['rows' => 3, 'placeholder' => 'Введите искомую подстроку']) ?>
+            <?= $form->field($model, 'substring')->textarea(['rows' => 3, 'autofocus' => true, 'placeholder' => 'Введите искомую подстроку']) ?>
 
         </div>
         <div class="card-footer text-muted">

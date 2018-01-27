@@ -14,9 +14,10 @@ use yii\helpers\ArrayHelper;
  * @property integer $end
  * @property integer $quarter_num
  * @property integer $year
+ * @property string $tax_pay_expired_at
  *
  * @property BankStatements[] $bankStatements
- * @property TaxCalculations[] $taxCalculations
+ * @property TaxQuarterCalculations[] $taxQuarterCalculations
  */
 class Periods extends \yii\db\ActiveRecord
 {
@@ -41,8 +42,9 @@ class Periods extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'temp_start', 'temp_end'], 'required'],
+            [['name', 'temp_start', 'temp_end', 'tax_pay_expired_at'], 'required'],
             [['start', 'end', 'quarter_num', 'year'], 'integer'],
+            [['tax_pay_expired_at'], 'safe'],
             [['name'], 'string', 'max' => 50],
             [['temp_start', 'temp_end'], 'safe'],
         ];
@@ -62,6 +64,7 @@ class Periods extends \yii\db\ActiveRecord
             'year' => 'Номер года',
             'temp_start' => 'Начало периода',
             'temp_end' => 'Конец периода',
+            'tax_pay_expired_at' => 'Крайний срок оплаты налога за квартал',
         ];
     }
 
@@ -122,11 +125,41 @@ class Periods extends \yii\db\ActiveRecord
     /**
      * Делает выборку периодов и возвращает в виде массива.
      * Применяется для вывода в виджетах Select2.
+     * @param $insertYears bool если передается этот параметр, то в массив будут добавлены года перед кварталами
+     * @param $conditions array
      * @return array
      */
-    public static function arrayMapForSelect2()
+    public static function arrayMapForSelect2($insertYears = null, $conditions = null)
     {
-        return ArrayHelper::map(Periods::find()->orderBy('start DESC')->all(), 'id', 'name');
+        $query = Periods::find()->orderBy('start DESC');
+
+        // добавляем условия, если передаются извне
+        if ($conditions != null) $query->where($conditions);
+        $result = $query->asArray()->all();
+
+        if ($insertYears === true) {
+            // необходимо подключить года
+            // делаем перебор массива и когда встречается четвертый квартал, на предыдущую позицию вставляем год
+            $iterator = 0;
+            foreach ($result as $index => $period) {
+                if ($period['quarter_num'] == isset($conditions) ? 3 : 4) {
+                    $result[] = [
+                        'id' => $period['year'],
+                        'name' => $period['year'] . ' год',
+                        'sort' => ($iterator-1),
+                    ];
+                }
+                $result[$index]['sort'] = $iterator;
+                $iterator++;
+            }
+
+            // поскольку вставка всегда производилась в конец массива, то после завершения цикла сортируем массив
+            ArrayHelper::multisort($result, 'sort');
+        }
+
+        $result = ArrayHelper::map($result, 'id', 'name');
+
+        return $result;
     }
 
     /**
@@ -140,8 +173,8 @@ class Periods extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getTaxCalculations()
+    public function getTaxQuarterCalculations()
     {
-        return $this->hasMany(TaxCalculations::className(), ['period_id' => 'id']);
+        return $this->hasMany(TaxQuarterCalculations::className(), ['period_id' => 'id']);
     }
 }

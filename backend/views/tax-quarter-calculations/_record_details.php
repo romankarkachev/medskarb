@@ -1,6 +1,6 @@
 <?php
 /* @var $this yii\web\View */
-/* @var $model common\models\TaxCalculations */
+/* @var $model common\models\TaxQuarterCalculations */
 ?>
 <div id="mw_td" class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-info" role="document">

@@ -6,7 +6,7 @@ use Yii;
 use yii\db\ActiveRecord;
 
 /**
- * This is the model class for table "tax_calculations".
+ * This is the model class for table "tax_quarter_calculations".
  *
  * @property integer $id
  * @property integer $calculated_at
@@ -18,23 +18,26 @@ use yii\db\ActiveRecord;
  * @property string $rate
  * @property string $amount
  * @property string $amount_fact
- * @property string $min
+ * @property string $paid_at
  * @property string $comment
  *
+ * @property string $calculatedByName
+ * @property string $calculatedByProfileName
  * @property string $periodName
  * @property integer $periodStart
  *
  * @property User $calculatedBy
+ * @property Profile $calculatedByProfile
  * @property Periods $period
  */
-class TaxCalculations extends \yii\db\ActiveRecord
+class TaxQuarterCalculations extends \yii\db\ActiveRecord
 {
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
-        return 'tax_calculations';
+        return 'tax_quarter_calculations';
     }
 
     /**
@@ -43,12 +46,16 @@ class TaxCalculations extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['period_id', 'dt', 'kt', 'diff', 'rate', 'amount', 'min'], 'required'],
+            [['period_id', 'dt', 'kt', 'diff', 'rate', 'amount'], 'required'],
             [['calculated_at', 'calculated_by', 'period_id'], 'integer'],
-            [['dt', 'kt', 'diff', 'rate', 'amount', 'amount_fact', 'min'], 'number'],
+            ['period_id', 'unique'],
+            [['dt', 'kt', 'diff', 'rate', 'amount', 'amount_fact'], 'number'],
+            [['paid_at'], 'safe'],
             [['comment'], 'string'],
             [['calculated_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['calculated_by' => 'id']],
             [['period_id'], 'exist', 'skipOnError' => true, 'targetClass' => Periods::className(), 'targetAttribute' => ['period_id' => 'id']],
+            // собственные правила валидации
+            ['amount_fact', 'validateAmountFact'],
         ];
     }
 
@@ -64,14 +71,14 @@ class TaxCalculations extends \yii\db\ActiveRecord
             'period_id' => 'Период',
             'dt' => 'Расходы',
             'kt' => 'Доходы',
-            'diff' => 'Разница',
+            'diff' => 'База налогообложения',
             'rate' => 'Ставка налога',
             'amount' => 'Сумма налога',
             'amount_fact' => 'Сумма налога, уплаченная по факту',
-            'min' => 'Минимальный налог',
+            'paid_at' => 'Дата оплаты налога',
             'comment' => 'Примечание',
-            // для сортировки
-            'periodName' => 'Период', // период
+            // вычисляемые поля
+            'periodName' => 'Период',
         ];
     }
 
@@ -98,14 +105,23 @@ class TaxCalculations extends \yii\db\ActiveRecord
         ];
     }
 
+    public function validateAmountFact()
+    {
+        if ($this->amount_fact != null && $this->amount_fact > 0 && $this->paid_at == null)
+            $this->addError('paid_at', 'Если налог оплачен, дата оплаты обязательна.');
+    }
+
     /**
-     * Производит расчет налога за текущий квартал.
+     * Производит расчет налога за переданный в параметрах квартал.
      * @param $period \common\models\Periods
      */
     public function calculateTaxAmountByPeriod($period = null)
     {
         if ($period == null) $period = Periods::getCurrentPeriod();
-        $this->rate = 10;
+        // извлекаем настройки
+        $settings = Settings::findOne(1);
+
+        if ($settings->tax_usn_rate != null) $this->rate = $settings->tax_usn_rate; else $this->rate = 10;
         $calculations = BankStatements::find()
             ->select([
                 'dt' => 'SUM(bank_amount_dt)',
@@ -120,16 +136,42 @@ class TaxCalculations extends \yii\db\ActiveRecord
         $this->dt = 0;
         $this->kt = 0;
         $this->diff = 0;
-        $this->min = 0;
         $this->amount = 0;
+
+        // поищем движение с оплатой налога в следующем квартале
+        if ($period->quarter_num < 4) try {
+            // определим следующий квартал, поскольку оплата будет в следующем квартале
+            if ($period->quarter_num != null && $period->year != null)
+                $nextPeriod = Periods::find()->where(['quarter_num' => ($period->quarter_num + 1), 'year' => $period->year])->one();
+
+            if (isset($nextPeriod)) {
+                $query = BankStatements::find()
+                    ->where(['like', 'bank_description', 'доходы минус расходы'])
+                    ->andWhere(['period_id' => $nextPeriod->id]);
+
+                if ($settings->tax_inspection_id != null)
+                    $query->andWhere([
+                        'or',
+                        'ca_id' => $settings->taxInspection->id,
+                        'inn' => $settings->taxInspection->inn,
+                    ]);
+
+                $paidFact = $query->all();
+                if (count($paidFact) == 1) {
+                    $amountFact = $paidFact[0]->bank_amount_dt;
+                    $amountFactPaidAt = $paidFact[0]->bank_date;
+                }
+            }
+        }
+        catch (\Exception $exception) {}
 
         if ($calculations != null) {
             $this->dt = floatval($calculations['dt']);
             $this->kt = floatval($calculations['kt']);
             $this->diff = $this->kt - $this->dt;
-            $this->min = round($this->kt / 100, 2);
-            $amount = $this->diff * $this->rate / 100;
-            $this->amount = max($this->min, $amount);
+            $this->amount = round($this->diff * $this->rate / 100);
+            if (isset($amountFact)) $this->amount_fact = $amountFact;
+            if (isset($amountFactPaidAt)) $this->paid_at = $amountFactPaidAt;
         }
     }
 
@@ -139,6 +181,23 @@ class TaxCalculations extends \yii\db\ActiveRecord
     public function getCalculatedBy()
     {
         return $this->hasOne(User::className(), ['id' => 'calculated_by']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCalculatedByProfile()
+    {
+        return $this->hasOne(Profile::className(), ['user_id' => 'calculated_by']);
+    }
+
+    /**
+     * Возвращает имя пользователя, который последним производил расчеты в виде profileName (username).
+     * @return string
+     */
+    public function getCalculatedByProfileName()
+    {
+        return $this->calculatedByProfile != null ? ($this->calculatedByProfile->name != null ? $this->calculatedByProfile->name : $this->calculatedBy->username) : '';
     }
 
     /**
