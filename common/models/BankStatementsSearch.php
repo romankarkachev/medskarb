@@ -14,9 +14,30 @@ use yii\helpers\ArrayHelper;
 class BankStatementsSearch extends BankStatements
 {
     /**
-     * Разделитель имен файлов для присоединяемого запроса.
+     * Разделитель имен файлов для присоединяемого запроса
      */
     const FILES_DELIMITER = '|';
+
+    /**
+     * Значения для поля отбора "Направление движения"
+     */
+    const FILTER_ЗНАЧЕНИЕ_НАПРАВЛЕНИЕ_ДВИЖЕНИЯ_ДОХОДЫ = 1;
+    const FILTER_ЗНАЧЕНИЕ_НАПРАВЛЕНИЕ_ДВИЖЕНИЯ_РАСХОДЫ = 2;
+    const FILTER_ЗНАЧЕНИЕ_НАПРАВЛЕНИЕ_ДВИЖЕНИЯ_ВСЕ = 3;
+
+    /**
+     * Значения для поля отбора "Форма оплаты"
+     */
+    const FILTER_ЗНАЧЕНИЕ_ФОРМА_ОПЛАТЫ_БАНК = 1;
+    const FILTER_ЗНАЧЕНИЕ_ФОРМА_ОПЛАТЫ_НАЛ = 2;
+    const FILTER_ЗНАЧЕНИЕ_ФОРМА_ОПЛАТЫ_ВСЕ = 3;
+
+    /**
+     * Значения для поля отбора "Признание"
+     */
+    const FILTER_ЗНАЧЕНИЕ_ПРИЗНАНИЕ_ДА = 1;
+    const FILTER_ЗНАЧЕНИЕ_ПРИЗНАНИЕ_НЕТ = 2;
+    const FILTER_ЗНАЧЕНИЕ_ПРИЗНАНИЕ_ВСЕ = 3;
 
     /**
      * Поле отбора, определяющее период (в том числе год).
@@ -37,12 +58,30 @@ class BankStatementsSearch extends BankStatements
     public $searchDateEnd;
 
     /**
+     * Поле отбора, которое позволяет отобразить на выбор: доходы, расходы, все
+     * @var integer
+     */
+    public $searchGroupDirection;
+
+    /**
+     * Поле отбора, которое позволяет отобразить на выбор: банк, наличные, все
+     * @var integer
+     */
+    public $searchGroupPaymentMethod;
+
+    /**
+     * Поле отбора, которое позволяет отобразить на выбор: признаваемые, не признаваемые, все
+     * @var integer
+     */
+    public $searchGroupActive;
+
+    /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['id', 'created_at', 'created_by', 'period_id', 'type', 'ca_id', 'is_active', 'searchPeriod'], 'integer'],
+            [['id', 'created_at', 'created_by', 'period_id', 'type', 'ca_id', 'is_active', 'searchPeriod', 'searchGroupDirection', 'searchGroupPaymentMethod', 'searchGroupActive'], 'integer'],
             [['bank_date', 'bank_dt', 'bank_kt', 'bank_bik_name', 'bank_doc_num', 'bank_description', 'inn'], 'safe'],
             [['bank_amount_dt', 'bank_amount_kt'], 'number'],
             // для отбора
@@ -59,7 +98,85 @@ class BankStatementsSearch extends BankStatements
             'searchDateStart' => 'Дата платежа с',
             'searchDateEnd' => 'По',
             'searchPeriod' => 'Период',
+            'searchGroupDirection' => 'Направление движения',
+            'searchGroupPaymentMethod' => 'Форма оплаты',
+            'searchGroupActive' => 'Признание',
         ]);
+    }
+
+    /**
+     * Возвращает набор значений для отбора по направлению движения.
+     * @return array
+     */
+    public static function fetchFilterGroupDirections()
+    {
+        return [
+            [
+                'id' => self::FILTER_ЗНАЧЕНИЕ_НАПРАВЛЕНИЕ_ДВИЖЕНИЯ_ДОХОДЫ,
+                'name' => 'Доходы',
+                'hint' => 'Отбирать только поступления на р/с',
+            ],
+            [
+                'id' => self::FILTER_ЗНАЧЕНИЕ_НАПРАВЛЕНИЕ_ДВИЖЕНИЯ_РАСХОДЫ,
+                'name' => 'Расходы',
+                'hint' => 'Отбирать только списания с р/с',
+            ],
+            [
+                'id' => self::FILTER_ЗНАЧЕНИЕ_НАПРАВЛЕНИЕ_ДВИЖЕНИЯ_ВСЕ,
+                'name' => 'Все',
+                'hint' => 'Не применять отбор по направлению движения',
+            ],
+        ];
+    }
+
+    /**
+     * Возвращает набор значений для отбора по форме оплаты.
+     * @return array
+     */
+    public static function fetchFilterGroupPaymentMethods()
+    {
+        return [
+            [
+                'id' => self::FILTER_ЗНАЧЕНИЕ_ФОРМА_ОПЛАТЫ_БАНК,
+                'name' => 'Банк',
+                'hint' => 'Отбирать только движения по банку',
+            ],
+            [
+                'id' => self::FILTER_ЗНАЧЕНИЕ_ФОРМА_ОПЛАТЫ_НАЛ,
+                'name' => 'Наличные, карта',
+                'hint' => 'Отбирать только введенные вручную',
+            ],
+            [
+                'id' => self::FILTER_ЗНАЧЕНИЕ_ФОРМА_ОПЛАТЫ_ВСЕ,
+                'name' => 'Все',
+                'hint' => 'Не применять отбор по форме оплаты',
+            ],
+        ];
+    }
+
+    /**
+     * Возвращает набор значений для отбора по признаваемости.
+     * @return array
+     */
+    public static function fetchFilterGroupActive()
+    {
+        return [
+            [
+                'id' => self::FILTER_ЗНАЧЕНИЕ_ПРИЗНАНИЕ_ДА,
+                'name' => 'Признаваемые',
+                'hint' => 'Отбирать только те движения, которые признаются доходами или расходами',
+            ],
+            [
+                'id' => self::FILTER_ЗНАЧЕНИЕ_ПРИЗНАНИЕ_НЕТ,
+                'name' => 'Не признаваемые',
+                'hint' => 'Отбирать только те движения, которые не признаются доходами или расходами',
+            ],
+            [
+                'id' => self::FILTER_ЗНАЧЕНИЕ_ПРИЗНАНИЕ_ВСЕ,
+                'name' => 'Все',
+                'hint' => 'Не применять отбор по признаваемости',
+            ],
+        ];
     }
 
     /**
@@ -187,6 +304,63 @@ class BankStatementsSearch extends BankStatements
                 // если указан только конец периода
                 $query->andFilterWhere(['<=', '`bank_statements`.`bank_date`', $this->searchDateEnd.' 23:59:59']);
             };
+
+        // отбор по направлению движения (доходы, расходы, все)
+        if ($this->searchGroupDirection != null) {
+            // доходы - это kt, расходы - это dt
+            switch ($this->searchGroupDirection) {
+                case self::FILTER_ЗНАЧЕНИЕ_НАПРАВЛЕНИЕ_ДВИЖЕНИЯ_ДОХОДЫ:
+                    $query->andFilterWhere([
+                        'or',
+                        ['bank_amount_dt' => null],
+                        ['bank_amount_dt' => 0],
+                    ]);
+                    break;
+                case self::FILTER_ЗНАЧЕНИЕ_НАПРАВЛЕНИЕ_ДВИЖЕНИЯ_РАСХОДЫ:
+                    $query->andFilterWhere([
+                        'or',
+                        ['bank_amount_kt' => null],
+                        ['bank_amount_kt' => 0],
+                    ]);
+                    break;
+            }
+        }
+        else $this->searchGroupDirection = self::FILTER_ЗНАЧЕНИЕ_НАПРАВЛЕНИЕ_ДВИЖЕНИЯ_ВСЕ;
+
+        // отбор по форме оплаты (банк, нал, все)
+        if ($this->searchGroupPaymentMethod != null) {
+            // 0 - авто, 1 - вручную
+            switch ($this->searchGroupPaymentMethod) {
+                case self::FILTER_ЗНАЧЕНИЕ_ФОРМА_ОПЛАТЫ_БАНК:
+                    $query->andFilterWhere([
+                        'type' => 0,
+                    ]);
+                    break;
+                case self::FILTER_ЗНАЧЕНИЕ_ФОРМА_ОПЛАТЫ_НАЛ:
+                    $query->andFilterWhere([
+                        'type' => 1,
+                    ]);
+                    break;
+            }
+        }
+        else $this->searchGroupPaymentMethod = self::FILTER_ЗНАЧЕНИЕ_ФОРМА_ОПЛАТЫ_ВСЕ;
+
+        // отбор по признаваемости в качестве дохода или расхода
+        if ($this->searchGroupActive != null) {
+            switch ($this->searchGroupActive) {
+                case self::FILTER_ЗНАЧЕНИЕ_ПРИЗНАНИЕ_ДА:
+                    $query->andFilterWhere([
+                        'is_active' => true,
+                    ]);
+                    break;
+                case self::FILTER_ЗНАЧЕНИЕ_ПРИЗНАНИЕ_НЕТ:
+                    $query->andFilterWhere([
+                        'is_active' => false,
+                    ]);
+                    break;
+            }
+        }
+        else $this->searchGroupActive = self::FILTER_ЗНАЧЕНИЕ_ПРИЗНАНИЕ_ВСЕ;
 
         $query->andFilterWhere(['like', 'bank_dt', $this->bank_dt])
             ->andFilterWhere(['like', 'bank_kt', $this->bank_kt])

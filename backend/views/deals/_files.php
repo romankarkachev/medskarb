@@ -28,7 +28,7 @@ use yii\widgets\Pjax;
                         'label' => 'Имя файла',
                         'format' => 'raw',
                         'value' => function ($model, $key, $index, $column) {
-                            /** @var $model \common\models\DocumentsFiles */
+                            /* @var $model \common\models\DealsFiles|\common\models\CounteragentsFiles|\common\models\DocumentsFiles */
                             /** @var $column \yii\grid\DataColumn */
 
                             $rep = '';
@@ -45,10 +45,25 @@ use yii\widgets\Pjax;
                                 );
                             }
 
+                            $url = '';
+                            switch ($model['sort']) {
+                                case 0:
+                                    $url = Url::to(['/deals/preview-file']);
+                                    break;
+                                case 1:
+                                    $url = Url::to(['/counteragents/preview-file']);
+                                    break;
+                                case 2:
+                                case 3:
+                                    $url = Url::to(['/documents/preview-file']);
+                                    break;
+                            }
+
                             return Html::a($model[$column->attribute], '#', [
                                 'class' => 'link-ajax',
-                                'id' => 'previewFile-' . $model['id'],
-                                'data-id' => $model['id'],
+                                'id' => 'previewFile-' . $model['guid'],
+                                'data-id' => $model['guid'],
+                                'data-url' => $url,
                                 'title' => 'Предварительный просмотр',
                                 'data-pjax' => 0,
                             ]) . $rep;
@@ -154,8 +169,6 @@ use yii\widgets\Pjax;
     </div>
 </div>
 <?php
-$urlPreview = Url::to(['/documents/preview-file']);
-
 $this->registerJs(<<<JS
 $("#new_files").on("filebatchuploadsuccess", function(event, data, previewId, index) {
     $.pjax.reload({container:"#afs"});
@@ -165,10 +178,11 @@ $("#new_files").on("filebatchuploadsuccess", function(event, data, previewId, in
 //
 function previewFileOnClick() {
     id = $(this).attr("data-id");
-    if (id != "") {
+    url = $(this).attr("data-url");
+    if (id != "" && url != "") {
         $("#modal_body").html('<p class="text-center"><i class="fa fa-cog fa-spin fa-3x text-info"></i><span class="sr-only">Подождите...</span></p>');
         $("#mw_preview").modal();
-        $("#modal_body").load("$urlPreview?id=" + id);
+        $("#modal_body").load(url + "?guid=" + id);
     }
 
     return false;

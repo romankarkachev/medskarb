@@ -27,6 +27,19 @@ use yii\widgets\Pjax;
                         'attribute' => 'ofn',
                         'label' => 'Имя файла',
                         'contentOptions' => ['style' => 'vertical-align: middle;'],
+                        'format' => 'raw',
+                        'value' => function ($model, $key, $index, $column) {
+                            /** @var $model \common\models\CounteragentsFiles */
+                            /** @var $column \yii\grid\DataColumn */
+
+                            return Html::a($model->{$column->attribute}, '#', [
+                                'class' => 'link-ajax',
+                                'id' => 'previewFile-' . $model->guid,
+                                'data-id' => $model->guid,
+                                'title' => 'Предварительный просмотр',
+                                'data-pjax' => 0,
+                            ]);
+                        },
                     ],
                     [
                         'label' => 'Скачать',
@@ -105,11 +118,43 @@ use yii\widgets\Pjax;
         </div>
     </div>
 </div>
+<div id="mw_preview" class="modal fade" tabindex="false" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-info" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="modal_title" class="modal-title">Предпросмотр файла</h4>
+            </div>
+            <div id="modal_body" class="modal-body">
+                <p>One fine body…</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
 <?php
+$urlPreview = Url::to(['/counteragents/preview-file']);
+
 $this->registerJs(<<<JS
 $("#new_files").on("filebatchuploadsuccess", function(event, data, previewId, index) {
     $.pjax.reload({container:"#afs"});
 });
+
+// Обработчик щелчка по ссылкам в колонке "Наименование" в таблице файлов.
+//
+function previewFileOnClick() {
+    id = $(this).attr("data-id");
+    if (id != "") {
+        $("#modal_body").html('<p class="text-center"><i class="fa fa-cog fa-spin fa-3x text-info"></i><span class="sr-only">Подождите...</span></p>');
+        $("#mw_preview").modal();
+        $("#modal_body").load("$urlPreview?guid=" + id);
+    }
+
+    return false;
+} // previewFileOnClick()
+
+$(document).on("click", "a[id ^= 'previewFile']", previewFileOnClick);
 JS
 , \yii\web\View::POS_READY);
 ?>

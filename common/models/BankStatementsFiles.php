@@ -10,6 +10,7 @@ use yii\helpers\FileHelper;
  * This is the model class for table "bank_statements_files".
  *
  * @property integer $id
+ * @property string $guid
  * @property integer $uploaded_at
  * @property integer $uploaded_by
  * @property integer $bs_id
@@ -39,6 +40,7 @@ class BankStatementsFiles extends \yii\db\ActiveRecord
         return [
             [['bs_id', 'ffp', 'fn', 'ofn'], 'required'],
             [['uploaded_at', 'uploaded_by', 'bs_id', 'size'], 'integer'],
+            [['guid'], 'string', 'max' => 36],
             [['ffp', 'fn', 'ofn'], 'string', 'max' => 255],
             [['bs_id'], 'exist', 'skipOnError' => true, 'targetClass' => BankStatements::className(), 'targetAttribute' => ['bs_id' => 'id']],
             [['uploaded_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['uploaded_by' => 'id']],
@@ -52,6 +54,7 @@ class BankStatementsFiles extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
+            'guid' => 'GUID',
             'uploaded_at' => 'Дата и время загрузки',
             'uploaded_by' => 'Автор загрузки',
             'bs_id' => 'Банковское движение',
@@ -78,6 +81,12 @@ class BankStatementsFiles extends \yii\db\ActiveRecord
                 'class' => 'yii\behaviors\BlameableBehavior',
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => ['uploaded_by'],
+                ],
+            ],
+            'guid' => [
+                'class' => 'common\behaviors\GUIDFieldBehavior',
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['guid'],
                 ],
             ],
         ];

@@ -34,8 +34,8 @@ use yii\widgets\Pjax;
 
                             return Html::a($model->{$column->attribute}, '#', [
                                 'class' => 'link-ajax',
-                                'id' => 'previewFile-' . $model->id,
-                                'data-id' => $model->id,
+                                'id' => 'previewFile-' . $model->guid,
+                                'data-id' => $model->guid,
                                 'title' => 'Предварительный просмотр',
                                 'data-pjax' => 0,
                             ]);
@@ -148,7 +148,7 @@ function previewFileOnClick() {
     if (id != "") {
         $("#modal_body").html('<p class="text-center"><i class="fa fa-cog fa-spin fa-3x text-info"></i><span class="sr-only">Подождите...</span></p>');
         $("#mw_preview").modal();
-        $("#modal_body").load("$urlPreview?id=" + id);
+        $("#modal_body").load("$urlPreview?guid=" + id);
     }
 
     return false;

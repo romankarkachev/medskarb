@@ -31,14 +31,19 @@ class DealsController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => [
-                    'index', 'create', 'update', 'delete', 'delete-document',
-                    'compose-contract-field', 'compose-amount-used-fields',
-                    'add-documents-through-select', 'render-unattached-documents',
-                    'upload-files', 'download', 'delete-file',
-                ],
                 'rules' => [
                     [
+                        'actions' => ['download-from-outside'],
+                        'allow' => true,
+                        'roles' => ['?', '@'],
+                    ],
+                    [
+                        'actions' => [
+                            'index', 'create', 'update', 'delete', 'delete-document',
+                            'compose-contract-field', 'compose-amount-used-fields',
+                            'add-documents-through-select', 'render-unattached-documents',
+                            'upload-files', 'download', 'preview-file', 'delete-file',
+                        ],
                         'allow' => true,
                         'roles' => ['root'],
                     ],
@@ -380,6 +385,39 @@ class DealsController extends Controller
             else
                 throw new NotFoundHttpException('Файл не обнаружен.');
         };
+    }
+
+    /**
+     * Отдает на скачивание файл, на который позиционируется по идентификатору из параметров.
+     * @param integer $guid
+     * @return mixed
+     * @throws NotFoundHttpException если файл не будет обнаружен
+     */
+    public function actionDownloadFromOutside($guid)
+    {
+        $model = DealsFiles::findOne(['guid' => $guid]);
+        if (file_exists($model->ffp))
+            return Yii::$app->response->sendFile($model->ffp, $model->ofn);
+        else
+            throw new NotFoundHttpException('Файл не обнаружен.');
+    }
+
+    /**
+     * Выполняет предварительный показ изображения.
+     * @param $guid integer идентификатор файла, который необходимо показать
+     * @return bool
+     */
+    public function actionPreviewFile($guid)
+    {
+        $model = DealsFiles::findOne(['guid' => $guid]);
+        if ($model != null) {
+            if ($model->isImage())
+                return \yii\helpers\Html::img(Yii::getAlias('@uploads-deals') . '/' . $model->fn, ['width' => '100%']);
+            else
+                return '<iframe src="http://docs.google.com/gview?url=' . Yii::$app->urlManager->createAbsoluteUrl(['/deals/download-from-outside', 'guid' => $guid]) . '&embedded=true" style="width:100%; height:600px;" frameborder="0"></iframe>';
+        }
+
+        return false;
     }
 
     /**

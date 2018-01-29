@@ -32,14 +32,19 @@ class DocumentsController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => [
-                    // при добавлении действия продублировать при необходимости в UrlManager в common\config\main.php
-                    'index', 'create', 'update', 'delete',
-                    'contracts', 'receipts', 'expenses', 'broker-ru', 'broker-lnr',
-                    'upload-files', 'download', 'preview-file', 'delete-file',
-                ],
                 'rules' => [
                     [
+                        'actions' => ['download-from-outside'],
+                        'allow' => true,
+                        'roles' => ['?', '@'],
+                    ],
+                    [
+                        'actions' => [
+                            // при добавлении действия продублировать при необходимости в UrlManager в common\config\main.php
+                            'index', 'create', 'update', 'delete',
+                            'contracts', 'receipts', 'expenses', 'broker-ru', 'broker-lnr',
+                            'upload-files', 'download', 'preview-file', 'delete-file',
+                        ],
                         'allow' => true,
                         'roles' => ['root'],
                     ],
@@ -300,18 +305,33 @@ class DocumentsController extends Controller
     }
 
     /**
+     * Отдает на скачивание файл, на который позиционируется по идентификатору из параметров.
+     * @param integer $guid
+     * @return mixed
+     * @throws NotFoundHttpException если файл не будет обнаружен
+     */
+    public function actionDownloadFromOutside($guid)
+    {
+        $model = DocumentsFiles::findOne(['guid' => $guid]);
+        if (file_exists($model->ffp))
+            return Yii::$app->response->sendFile($model->ffp, $model->ofn);
+        else
+            throw new NotFoundHttpException('Файл не обнаружен.');
+    }
+
+    /**
      * Выполняет предварительный показ изображения.
-     * @param $id integer идентификатор файла, который необходимо показать
+     * @param $guid integer идентификатор файла, который необходимо показать
      * @return bool
      */
-    public function actionPreviewFile($id)
+    public function actionPreviewFile($guid)
     {
-        $model = DocumentsFiles::findOne($id);
+        $model = DocumentsFiles::findOne(['guid' => $guid]);
         if ($model != null) {
             if ($model->isImage())
                 return \yii\helpers\Html::img(Yii::getAlias('@uploads-docs') . '/' . $model->fn, ['width' => '100%']);
             else
-                return '<iframe src="http://docs.google.com/gview?url=' . Yii::$app->urlManager->createAbsoluteUrl(['/documents/download-file', 'id' => $id]) . '&embedded=true" style="width:100%; height:600px;" frameborder="0"></iframe>';
+                return '<iframe src="http://docs.google.com/gview?url=' . Yii::$app->urlManager->createAbsoluteUrl(['/documents/download-from-outside', 'guid' => $guid]) . '&embedded=true" style="width:100%; height:600px;" frameborder="0"></iframe>';
         }
 
         return false;

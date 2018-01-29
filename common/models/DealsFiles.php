@@ -10,6 +10,7 @@ use yii\helpers\FileHelper;
  * This is the model class for table "deals_files".
  *
  * @property integer $id
+ * @property string $guid
  * @property integer $uploaded_at
  * @property integer $uploaded_by
  * @property integer $deal_id
@@ -39,6 +40,7 @@ class DealsFiles extends \yii\db\ActiveRecord
         return [
             [['deal_id', 'ffp', 'fn', 'ofn'], 'required'],
             [['uploaded_at', 'uploaded_by', 'deal_id', 'size'], 'integer'],
+            [['guid'], 'string', 'max' => 36],
             [['ffp', 'fn', 'ofn'], 'string', 'max' => 255],
             [['deal_id'], 'exist', 'skipOnError' => true, 'targetClass' => Deals::className(), 'targetAttribute' => ['deal_id' => 'id']],
             [['uploaded_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['uploaded_by' => 'id']],
@@ -52,6 +54,7 @@ class DealsFiles extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
+            'guid' => 'GUID',
             'uploaded_at' => 'Дата и время загрузки',
             'uploaded_by' => 'Автор загрузки',
             'deal_id' => 'Сделка',
@@ -78,6 +81,12 @@ class DealsFiles extends \yii\db\ActiveRecord
                 'class' => 'yii\behaviors\BlameableBehavior',
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => ['uploaded_by'],
+                ],
+            ],
+            'guid' => [
+                'class' => 'common\behaviors\GUIDFieldBehavior',
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['guid'],
                 ],
             ],
         ];
@@ -128,6 +137,20 @@ class DealsFiles extends \yii\db\ActiveRecord
         }
 
         return $filepath;
+    }
+
+    /**
+     * Проверяет, является ли файл изображением.
+     * @return bool
+     */
+    public function isImage()
+    {
+        $is = @getimagesize($this->ffp);
+        if ( !$is )
+            return false;
+        elseif ( !in_array($is[2], array(1,2,3)) )
+            return false;
+        else return true;
     }
 
     /**

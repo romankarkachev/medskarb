@@ -68,7 +68,7 @@ return [
                 '/users' => '/user/admin/index',
                 '<controller:users>/<action:create|update|delete|update-profile|info|confirm|block|assignments>' => '/user/admin/<action>',
                 '<action:profile|account>' => '/user-settings/<action>',
-                '<controller:documents>/<action:create|update|delete|upload-files|download|preview-file|delete-file>' => '<controller>/<action>',
+                '<controller:documents>/<action:create|update|delete|upload-files|download|download-from-outside|preview-file|delete-file>' => '<controller>/<action>',
                 '<controller:documents>/<action_id:[\w_\/-]+>' => 'documents/index',
                 '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
             ],

@@ -1,5 +1,6 @@
 <?php
 
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\bootstrap\ActiveForm;
@@ -7,11 +8,16 @@ use yii\web\JsExpression;
 use kartik\select2\Select2;
 use kartik\datecontrol\DateControl;
 use common\models\Periods;
+use common\models\BankStatementsSearch;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\BankStatementsSearch */
 /* @var $form yii\bootstrap\ActiveForm */
 /* @var $searchApplied bool */
+
+$directions = BankStatementsSearch::fetchFilterGroupDirections();
+$paymentMethods = BankStatementsSearch::fetchFilterGroupPaymentMethods();
+$activity = BankStatementsSearch::fetchFilterGroupActive();
 ?>
 
 <div class="bank-statements-search">
@@ -108,6 +114,62 @@ use common\models\Periods;
                             'templateResult' => new JsExpression('function(result) { return result.text; }'),
                             'templateSelection' => new JsExpression('function (result) { return result.text; }'),
                         ],
+                    ]) ?>
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-auto">
+                    <?= $form->field($model, 'searchGroupDirection', [
+                        'inline' => true,
+                    ])->radioList(ArrayHelper::map($directions, 'id', 'name'), [
+                        'class' => 'btn-group',
+                        'data-toggle' => 'buttons',
+                        'unselect' => null,
+                        'item' => function ($index, $label, $name, $checked, $value) use ($directions) {
+                            $hint = '';
+                            $key = array_search($value, array_column($directions, 'id'));
+                            if ($key !== false && isset($directions[$key]['hint'])) $hint = ' title="' . $directions[$key]['hint'] . '"';
+
+                            return '<label class="btn btn-success' . ($checked ? ' active' : '') . '"' . $hint . '>' .
+                                Html::radio($name, $checked, ['value' => $value, 'class' => 'types-btn']) . $label . '</label>';
+                        },
+                    ]) ?>
+
+                </div>
+                <div class="col-auto">
+                    <?= $form->field($model, 'searchGroupPaymentMethod', [
+                        'inline' => true,
+                    ])->radioList(ArrayHelper::map($paymentMethods, 'id', 'name'), [
+                        'class' => 'btn-group',
+                        'data-toggle' => 'buttons',
+                        'unselect' => null,
+                        'item' => function ($index, $label, $name, $checked, $value) use ($paymentMethods) {
+                            $hint = '';
+                            $key = array_search($value, array_column($paymentMethods, 'id'));
+                            if ($key !== false && isset($paymentMethods[$key]['hint'])) $hint = ' title="' . $paymentMethods[$key]['hint'] . '"';
+
+                            return '<label class="btn btn-success' . ($checked ? ' active' : '') . '"' . $hint . '>' .
+                                Html::radio($name, $checked, ['value' => $value, 'class' => 'types-btn']) . $label . '</label>';
+                        },
+                    ]) ?>
+
+                </div>
+                <div class="col-auto">
+                    <?= $form->field($model, 'searchGroupActive', [
+                        'inline' => true,
+                    ])->radioList(ArrayHelper::map($activity, 'id', 'name'), [
+                        'class' => 'btn-group',
+                        'data-toggle' => 'buttons',
+                        'unselect' => null,
+                        'item' => function ($index, $label, $name, $checked, $value) use ($activity) {
+                            $hint = '';
+                            $key = array_search($value, array_column($activity, 'id'));
+                            if ($key !== false && isset($activity[$key]['hint'])) $hint = ' title="' . $activity[$key]['hint'] . '"';
+
+                            return '<label class="btn btn-success' . ($checked ? ' active' : '') . '"' . $hint . '>' .
+                                Html::radio($name, $checked, ['value' => $value, 'class' => 'types-btn']) . $label . '</label>';
+                        },
                     ]) ?>
 
                 </div>

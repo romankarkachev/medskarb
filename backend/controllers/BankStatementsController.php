@@ -2,16 +2,16 @@
 
 namespace backend\controllers;
 
-use backend\models\BankStatementsClear;
-use common\models\Settings;
 use Yii;
 use common\models\BankStatements;
 use common\models\BankStatementsSearch;
 use backend\models\BankStatementsImport;
+use backend\models\BankStatementsClear;
 use common\models\BankStatementsFiles;
 use common\models\Counteragents;
 use common\models\Periods;
 use common\models\SkipBankRecords;
+use common\models\Settings;
 use yii\data\ArrayDataProvider;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
@@ -80,17 +80,11 @@ class BankStatementsController extends Controller
 
         $dataProvider = $searchModel->search(ArrayHelper::merge($period_param, Yii::$app->request->queryParams));
 
-        $vars = [
+        return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'searchApplied' => $searchApplied,
-        ];
-
-        // определим налоговую инспекцию, чтобы выделять движения по ней в списке
-        $settings = Settings::findOne(1);
-        if ($settings != null && $settings->tax_inspection_id != null) $vars['tax_inspection_id'] = $settings->tax_inspection_id;
-
-        return $this->render('index', $vars);
+        ]);
     }
 
     /**
@@ -269,6 +263,9 @@ class BankStatementsController extends Controller
                     // инн контрагентов
                     $inns = Counteragents::find()->select('id, inn')->asArray()->all();
 
+                    // настройки системы
+                    $settings = Settings::findOne(1);
+
                     // перебираем массив и создаем новые элементы
                     $spaces = 0; // количество накопленных пробелов для остановки всей процедуры импорта
                     $result = []; // массив для элементов при предварительном просмотре
@@ -318,6 +315,9 @@ class BankStatementsController extends Controller
 
                         // определим контрагента
                         $ca_id = BankStatementsImport::DetermineCounteragent($inns, $inn);
+                        // вручную определяется основной покупатель
+                        if (mb_stripos($bank_dt, 'Захаров Александр Иванович') > 0 && $settings != null)
+                            $ca_id = $settings->default_buyer_id;
 
                         // преобразуем сумму Дт
                         $amount_dt = BankStatementsImport::normalizeAmount($row['L']);

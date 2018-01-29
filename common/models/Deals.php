@@ -232,7 +232,7 @@ class Deals extends \yii\db\ActiveRecord
 
         // файлы, привязанные к сделке
         $subarray = DealsFiles::find()
-            ->select(['id', 'uploaded_at', 'ofn', 'size'])
+            ->select(['id', 'guid', 'uploaded_at', 'ofn', 'size'])
             ->where(['deal_id' => $this->id])
             ->asArray()->all();
         foreach ($subarray as $file) {
@@ -248,7 +248,7 @@ class Deals extends \yii\db\ActiveRecord
 
         // файлы, привязанные к контрагенту
         $subarray = CounteragentsFiles::find()
-            ->select(['id', 'uploaded_at', 'ofn', 'size'])
+            ->select(['id', 'guid', 'uploaded_at', 'ofn', 'size'])
             ->where(['ca_id' => $this->customer_id])
             ->asArray()->all();
         foreach ($subarray as $file) {
@@ -264,13 +264,14 @@ class Deals extends \yii\db\ActiveRecord
 
         // файлы, привязанные к договору с контрагентом
         $subarray = DocumentsFiles::find()
-            ->select(['id', 'doc_id', 'uploaded_at', 'ofn', 'size'])
+            ->select(['id', 'guid', 'doc_id', 'uploaded_at', 'ofn', 'size'])
             ->where(['doc_id' => $this->contract_id])
             ->all();
         foreach ($subarray as $file) {
             /* @var $file \common\models\DocumentsFiles */
             $array[] = [
                 'id' => $file->id,
+                'guid' => $file->guid,
                 'uploaded_at' => $file->uploaded_at,
                 'ofn' => $file->ofn,
                 'sort' => 2,
@@ -285,13 +286,14 @@ class Deals extends \yii\db\ActiveRecord
 
         // файлы, привязанные к документам
         $subarray = DocumentsFiles::find()
-            ->select(['id', 'doc_id', 'uploaded_at', 'ofn', 'size'])
+            ->select(['id', 'guid', 'doc_id', 'uploaded_at', 'ofn', 'size'])
             ->where(['in', 'doc_id', $attachedDocsIds])
             ->all();
         foreach ($subarray as $file) {
             /* @var $file \common\models\DocumentsFiles */
             $array[] = [
                 'id' => $file->id,
+                'guid' => $file->guid,
                 'uploaded_at' => $file->uploaded_at,
                 'ofn' => $file->ofn,
                 'sort' => 3,

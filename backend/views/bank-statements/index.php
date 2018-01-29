@@ -77,13 +77,6 @@ if (!isset($tax_inspection_id)) $tax_inspection_id = null;
                             if ($model->type == \common\models\BankStatements::TYPE_MANUAL)
                                 $manual = '<i class="fa fa-pencil text-info" aria-hidden="true" title="Добавлено вручную"></i>';
 
-                            $ca_name = '<em>' . $model->bank_description . '</em> ';
-                            if ($model->ca_id != null) {
-                                $ca_name = '<strong>' . $model->caName . '</strong> ';
-                                if ($tax_inspection_id != null && $tax_inspection_id == $model->ca_id)
-                                    $ca_name .= '<p class="mb-0"><em>' . $model->bank_description . '</em></p>';
-                            }
-
                             $files = explode(\common\models\BankStatementsSearch::FILES_DELIMITER, $model->filesDetails);
                             $filesDetails = '';
                             if ($model->filesCount > 0) {
@@ -91,14 +84,20 @@ if (!isset($tax_inspection_id)) $tax_inspection_id = null;
                                 // если когда-нибудь будут с этим проблемы, то подумать, как сделать, чтобы по щелчку
                                 // по камере отображалось первое изображение в этой группе
                                 $filesDetails = ' ' . Html::a('<i class="fa fa-camera" aria-hidden="true"></i>', $uploadDir . $files[0], [
-                                    'rel' => 'fancybox',
-                                    'title' => 'Чек № ' . $model->bank_doc_num .
-                                        ' от ' . Yii::$app->formatter->asDate($model->bank_date, 'php:d.m.Y') .
-                                        ' на сумму ' . Yii::$app->formatter->asCurrency($model->bank_amount_dt != null ? $model->bank_amount_dt : $model->bank_amount_kt),
-                                ]);
+                                        'rel' => 'fancybox',
+                                        'title' => 'Чек № ' . $model->bank_doc_num .
+                                            ' от ' . Yii::$app->formatter->asDate($model->bank_date, 'php:d.m.Y') .
+                                            ' на сумму ' . Yii::$app->formatter->asCurrency($model->bank_amount_dt != null ? $model->bank_amount_dt : $model->bank_amount_kt),
+                                    ]);
                             }
 
-                            return $ca_name . $manual . $filesDetails;
+                            $ca_name = '<em>' . $model->bank_description . '</em> ';
+                            if ($model->ca_id != null) {
+                                $ca_name = '<strong>' . $model->caName . '</strong> ' . $manual . $filesDetails;
+                                $ca_name .= '<p class="mb-0"><em>' . $model->bank_description . '</em></p>';
+                            }
+
+                            return $ca_name;
                         },
                     ],
                     [
