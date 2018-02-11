@@ -8,10 +8,12 @@ use kartik\datecontrol\DateControl;
 /* @var $model common\models\TaxYearCalculations */
 /* @var $form yii\bootstrap\ActiveForm */
 ?>
-<div class="form-group">
-    <h3>Упрощенная система налогообложения</h3>
-</div>
-<div class="row">
+<?= $this->render('_source_table', ['model' => $model]) ?>
+<?= $this->render('_declaration_measurements', ['model' => $model]) ?>
+            <div class="form-group">
+                <h3>Упрощенная система налогообложения</h3>
+            </div>
+            <div class="row">
                 <div class="col-auto">
                     <div class="form-group">
                         <label class="control-label"><?= $model->attributeLabels()['kt'] ?></label>
@@ -102,6 +104,55 @@ use kartik\datecontrol\DateControl;
                         </div>
                     </div>
                 </div>
+                <?php if ($model->tax_pay_expired_at != null): ?>
+                <div class="col-auto">
+                    <label class="control-label">Крайний срок оплаты</label>
+                    <p class="form-control font-weight-bold text-danger"><?= Yii::$app->formatter->asDate($model->tax_pay_expired_at, 'php:d F Y г.') ?></p>
+                </div>
+                <?php endif; ?>
+            </div>
+            <div class="row">
+                <div class="col-auto">
+                    <?= $form->field($model, 'declared_at')->widget(DateControl::className(), [
+                        'value' => $model->declared_at,
+                        'type' => DateControl::FORMAT_DATE,
+                        'language' => 'ru',
+                        'displayFormat' => 'php:d.m.Y',
+                        'saveFormat' => 'php:Y-m-d',
+                        'widgetOptions' => [
+                            'options' => ['placeholder' => 'выберите'],
+                            'type' => \kartik\date\DatePicker::TYPE_COMPONENT_APPEND,
+                            'layout' => '<div class="input-group">{input}{picker}</div>',
+                            'pickerButton' => '<span class="input-group-addon kv-date-calendar" title="Выбрать дату"><i class="fa fa-calendar" aria-hidden="true"></i></span>',
+                            'pluginOptions' => [
+                                'todayHighlight' => true,
+                                'weekStart' => 1,
+                                'autoclose' => true,
+                            ],
+                            'pluginEvents' => [
+                                'changeDate' => 'function(e) {anyDateOnChange();}',
+                            ],
+                        ],
+                    ]) ?>
+
+                </div>
+                <div class="col-auto">
+                    <?= $form->field($model, 'paid_fact', [
+                        'template' => '{label}<div class="input-group">{input}<span class="input-group-addon"><i class="fa fa-rub"></i></span></div>{error}'
+                    ])->widget(MaskedInput::className(), [
+                        'clientOptions' => [
+                            'alias' =>  'numeric',
+                            'groupSeparator' => ' ',
+                            'autoUnmask' => true,
+                            'autoGroup' => true,
+                            'removeMaskOnSubmit' => true,
+                        ],
+                    ])->textInput([
+                        'maxlength' => true,
+                        'placeholder' => '0',
+                    ]) ?>
+
+                </div>
                 <div class="col-auto">
                     <?= $form->field($model, 'paid_at')->widget(DateControl::className(), [
                         'value' => $model->paid_at,
@@ -126,12 +177,6 @@ use kartik\datecontrol\DateControl;
                     ]) ?>
 
                 </div>
-                <?php if ($model->tax_pay_expired_at != null): ?>
-                <div class="col-auto">
-                    <label class="control-label">Крайний срок оплаты</label>
-                    <p class="form-control font-weight-bold text-danger"><?= Yii::$app->formatter->asDate($model->tax_pay_expired_at, 'php:d F Y г.') ?></p>
-                </div>
-                <?php endif; ?>
             </div>
             <div class="form-group">
                 <h3>Взнос в Пенсионный Фонд</h3>
@@ -224,3 +269,26 @@ use kartik\datecontrol\DateControl;
 <?= $form->field($model, 'pf_limit')->hiddenInput()->label(false) ?>
 <?= $form->field($model, 'pf_rate')->hiddenInput()->label(false) ?>
 <?= $form->field($model, 'pf_amount')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'calculation_details')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdm')->hiddenInput()->label(false) ?>
+
+<?= $form->field($model, 'tdr020')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr040')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr070')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr100')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr210')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr211')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr212')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr213')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr220')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr221')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr222')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr223')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr240')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr241')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr242')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr243')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr270')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr271')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr272')->hiddenInput()->label(false) ?>
+<?= $form->field($model, 'tdr273')->hiddenInput()->label(false) ?>

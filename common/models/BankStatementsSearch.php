@@ -294,15 +294,15 @@ class BankStatementsSearch extends BankStatements
         if ($this->searchDateStart !== null or $this->searchDateEnd !== null)
             if ($this->searchDateStart !== '' && $this->searchDateEnd !== '') {
                 // если указаны обе даты
-                $query->andFilterWhere(['between', '`bank_statements`.`bank_date`', $this->searchDateStart.' 00:00:00', $this->searchDateEnd.' 23:59:59']);
+                $query->andWhere(['between', '`bank_statements`.`bank_date`', $this->searchDateStart.' 00:00:00', $this->searchDateEnd.' 23:59:59']);
             }
             else if ($this->searchDateStart !== '' && $this->searchDateEnd === '') {
                 // если указано только начало периода
-                $query->andFilterWhere(['>=','`bank_statements`.`bank_date`', $this->searchDateStart.' 00:00:00']);
+                $query->andWhere(['>=','`bank_statements`.`bank_date`', $this->searchDateStart.' 00:00:00']);
             }
             else if ($this->searchDateStart === '' && $this->searchDateEnd !== '') {
                 // если указан только конец периода
-                $query->andFilterWhere(['<=', '`bank_statements`.`bank_date`', $this->searchDateEnd.' 23:59:59']);
+                $query->andWhere(['<=', '`bank_statements`.`bank_date`', $this->searchDateEnd.' 23:59:59']);
             };
 
         // отбор по направлению движения (доходы, расходы, все)
@@ -310,14 +310,14 @@ class BankStatementsSearch extends BankStatements
             // доходы - это kt, расходы - это dt
             switch ($this->searchGroupDirection) {
                 case self::FILTER_ЗНАЧЕНИЕ_НАПРАВЛЕНИЕ_ДВИЖЕНИЯ_ДОХОДЫ:
-                    $query->andFilterWhere([
+                    $query->andWhere([
                         'or',
                         ['bank_amount_dt' => null],
                         ['bank_amount_dt' => 0],
                     ]);
                     break;
                 case self::FILTER_ЗНАЧЕНИЕ_НАПРАВЛЕНИЕ_ДВИЖЕНИЯ_РАСХОДЫ:
-                    $query->andFilterWhere([
+                    $query->andWhere([
                         'or',
                         ['bank_amount_kt' => null],
                         ['bank_amount_kt' => 0],
@@ -332,12 +332,12 @@ class BankStatementsSearch extends BankStatements
             // 0 - авто, 1 - вручную
             switch ($this->searchGroupPaymentMethod) {
                 case self::FILTER_ЗНАЧЕНИЕ_ФОРМА_ОПЛАТЫ_БАНК:
-                    $query->andFilterWhere([
+                    $query->andWhere([
                         'type' => 0,
                     ]);
                     break;
                 case self::FILTER_ЗНАЧЕНИЕ_ФОРМА_ОПЛАТЫ_НАЛ:
-                    $query->andFilterWhere([
+                    $query->andWhere([
                         'type' => 1,
                     ]);
                     break;
@@ -349,12 +349,12 @@ class BankStatementsSearch extends BankStatements
         if ($this->searchGroupActive != null) {
             switch ($this->searchGroupActive) {
                 case self::FILTER_ЗНАЧЕНИЕ_ПРИЗНАНИЕ_ДА:
-                    $query->andFilterWhere([
+                    $query->andWhere([
                         'is_active' => true,
                     ]);
                     break;
                 case self::FILTER_ЗНАЧЕНИЕ_ПРИЗНАНИЕ_НЕТ:
-                    $query->andFilterWhere([
+                    $query->andWhere([
                         'is_active' => false,
                     ]);
                     break;
