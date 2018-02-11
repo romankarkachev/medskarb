@@ -42,7 +42,7 @@ class CounteragentsController extends Controller
                             'render-counteragents-info', 'render-ambiguous-counteragents-info',
                             'fetch-bank-by-bik', 'fetch-counteragents-info-by-inn-orgn',
                             'list-for-document', 'list-of-customers', 'list-of-brokers-ru', 'list-of-brokers-lnr',
-                            'upload-files', 'download', 'preview-file', 'delete-file'
+                            'upload-files', 'download', 'preview-file', 'delete-file',
                         ],
                         'allow' => true,
                         'roles' => ['@'],
