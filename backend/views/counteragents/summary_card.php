@@ -86,4 +86,12 @@ if ($model->bank_an != null && $model->bank_an != '')
         </div>
     </div>
     <?php endif; ?>
+    <?php if (!empty($model->comment)): ?>
+    <div class="form-group row">
+        <label class="col-sm-3 col-form-label font-weight-bold"><?= $model->attributeLabels()['comment'] ?></label>
+        <div class="col-sm-9">
+            <p class="form-control-static"><?= nl2br($model->comment) ?></p>
+        </div>
+    </div>
+    <?php endif; ?>
 </div>

@@ -120,29 +120,29 @@ class CounteragentsSearch extends Counteragents
             'created_by' => $this->created_by,
             'updated_at' => $this->updated_at,
             'updated_by' => $this->updated_by,
-            'counteragents.type_id' => $this->type_id,
+            Counteragents::tableName() . '.type_id' => $this->type_id,
             'contract_id' => $this->contract_id,
         ]);
 
-        if ($this->searchEntire != null)
-            $query->orFilterWhere(['like', 'name', $this->searchEntire])
-                ->andFilterWhere(['like', 'name_full', $this->searchEntire])
-                ->andFilterWhere(['like', 'inn', $this->searchEntire])
-                ->andFilterWhere(['like', 'kpp', $this->searchEntire])
-                ->andFilterWhere(['like', 'ogrn', $this->searchEntire])
-                ->andFilterWhere(['like', 'bank_an', $this->searchEntire])
-                ->andFilterWhere(['like', 'bank_bik', $this->searchEntire])
-                ->andFilterWhere(['like', 'bank_name', $this->searchEntire])
-                ->andFilterWhere(['like', 'bank_ca', $this->searchEntire])
-                ->andFilterWhere(['like', 'email', $this->searchEntire])
-                ->andFilterWhere(['like', 'contact_person', $this->searchEntire])
+        if (!empty($this->searchEntire))
+            $query->orFilterWhere(['like', Counteragents::tableName() . '.name', $this->searchEntire])
+                ->orFilterWhere(['like', 'name_full', $this->searchEntire])
+                ->orFilterWhere(['like', 'inn', $this->searchEntire])
+                ->orFilterWhere(['like', 'kpp', $this->searchEntire])
+                ->orFilterWhere(['like', 'ogrn', $this->searchEntire])
+                ->orFilterWhere(['like', 'bank_an', $this->searchEntire])
+                ->orFilterWhere(['like', 'bank_bik', $this->searchEntire])
+                ->orFilterWhere(['like', 'bank_name', $this->searchEntire])
+                ->orFilterWhere(['like', 'bank_ca', $this->searchEntire])
+                ->orFilterWhere(['like', 'email', $this->searchEntire])
+                ->orFilterWhere(['like', 'contact_person', $this->searchEntire])
                 ->orFilterWhere(['like', 'address_j', $this->searchEntire])
                 ->orFilterWhere(['like', 'address_p', $this->searchEntire])
                 ->orFilterWhere(['like', 'address_m', $this->searchEntire])
                 ->orFilterWhere(['like', 'phones', $this->searchEntire])
-                ->orFilterWhere(['like', 'comment', $this->searchEntire]);
+                ->orFilterWhere(['like', Counteragents::tableName() . '.comment', $this->searchEntire]);
         else
-            $query->andFilterWhere(['like', 'name', $this->name])
+            $query->andFilterWhere(['like', Counteragents::tableName() . '.name', $this->name])
                 ->andFilterWhere(['like', 'name_full', $this->name_full])
                 ->andFilterWhere(['like', 'inn', $this->inn])
                 ->andFilterWhere(['like', 'kpp', $this->kpp])
@@ -157,7 +157,7 @@ class CounteragentsSearch extends Counteragents
                 ->andFilterWhere(['like', 'address_p', $this->address_p])
                 ->andFilterWhere(['like', 'address_m', $this->address_m])
                 ->andFilterWhere(['like', 'phones', $this->phones])
-                ->andFilterWhere(['like', 'comment', $this->comment]);
+                ->andFilterWhere(['like', Counteragents::tableName() . '.comment', $this->comment]);
 
         return $dataProvider;
     }

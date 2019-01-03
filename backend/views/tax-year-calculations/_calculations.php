@@ -90,7 +90,7 @@ use kartik\datecontrol\DateControl;
                         <div class="input-group">
                             <?= Html::input('text', null, Yii::$app->formatter->asInteger($model->amount_fact), ['class' => 'form-control', 'disabled' => true]) ?>
 
-                            <span class="input-group-addon">%</span>
+                            <span class="input-group-addon"><i class="fa fa-rub"></i></span>
                         </div>
                     </div>
                 </div>
@@ -100,7 +100,7 @@ use kartik\datecontrol\DateControl;
                         <div class="input-group">
                             <?= Html::input('text', null, Yii::$app->formatter->asInteger($model->amount_to_pay), ['class' => 'form-control', 'disabled' => true]) ?>
 
-                            <span class="input-group-addon">%</span>
+                            <span class="input-group-addon"><i class="fa fa-rub"></i></span>
                         </div>
                     </div>
                 </div>

@@ -160,7 +160,7 @@ $label_contract = $model->attributeLabels()['contract_id'].' &nbsp; '.Html::a('<
 </div>
 <?php
 $url_bank_bik = Url::to(['/counteragents/fetch-bank-by-bik']);
-$url_inn_ogrn = Url::to(['/counteragents/fetch-counteragents-info-by-inn-orgn']);
+$url_inn_ogrn = Url::to(['/counteragents/fetch-counteragents-info-dadata']);
 $url_open_contract = Url::to(['/documents/update']);
 
 $field_inn = \common\models\Counteragents::API_FIELD_ИНН;
@@ -216,7 +216,7 @@ function innOnChange() {
         if (inn != "") {
             \$label = $("#label-inn");
             \$label.html("$label_inn &nbsp;<i class=\"fa fa-spinner fa-pulse fa-fw text-primary\"></i>");
-            $.get("$url_inn_ogrn?field_id=" + $field_inn + "&value=" + inn, function(response) {
+            $.get("$url_inn_ogrn?query=" + inn, function(response) {
                 if (response != false) {
                     fillFields(response);
                     //if (kpp == "" && response.kpp) $("#counteragents-kpp").val(response.kpp);
@@ -240,7 +240,7 @@ function ogrnOnChange() {
         if (ogrn != "") {
             \$label = $("#label-ogrn");
             \$label.html("$label_ogrn &nbsp;<i class=\"fa fa-spinner fa-pulse fa-fw text-primary\"></i>");
-            $.get("$url_inn_ogrn?field_id=" + $field_ogrn + "&value=" + ogrn, function(response) {
+            $.get("$url_inn_ogrn?query=" + ogrn, function(response) {
                 if (response != false) {
                     fillFields(response);
                     //if (kpp == "" && response.kpp) $("#counteragents-kpp").val(response.kpp);

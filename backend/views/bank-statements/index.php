@@ -128,6 +128,11 @@ if (!isset($tax_inspection_id)) $tax_inspection_id = null;
                         'options' => ['width' => '120'],
                         'headerOptions' => ['class' => 'text-center'],
                     ],
+                    [
+                        'class' => 'backend\components\grid\ActionColumn',
+                        'template' => '{delete}',
+                        'visible' => false,
+                    ],
                 ],
             ]); ?>
 

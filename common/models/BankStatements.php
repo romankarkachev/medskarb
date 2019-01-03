@@ -157,6 +157,25 @@ class BankStatements extends \yii\db\ActiveRecord
     }
 
     /**
+     * @inheritdoc
+     */
+    public function beforeDelete()
+    {
+        if (parent::beforeDelete()) {
+            // Удаление связанных объектов перед удалением объекта
+
+            // удаляем возможные файлы
+            // deleteAll не вызывает beforeDelete, поэтому делаем перебор
+            $files = BankStatementsFiles::find()->where(['bs_id' => $this->id])->all();
+            foreach ($files as $file) $file->delete();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getCa()

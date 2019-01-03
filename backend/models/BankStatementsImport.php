@@ -123,7 +123,7 @@ class BankStatementsImport extends Model
         $result = trim($value);
         $result = str_replace(chr(194).chr(160), '', $result);
         $result = str_replace(' ', '', $result);
-        $result = str_replace(',', '.', $result);
+        $result = str_replace(',', '', $result);
         return floatval($result);
     }
 

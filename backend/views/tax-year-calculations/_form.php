@@ -34,8 +34,9 @@ $formNameId = strtolower($model->formName());
             </div>
             <?= $form->field($model, 'comment')->textarea(['rows' => 3, 'placeholder' => 'Введите примечание к расчету']) ?>
 
+            <p class="text-muted">Суммы доходов, расходов, базы и налога в декларации представлены нарастающим итогом.</p>
             <?php if (!$model->isNewRecord): ?>
-                <p class="text-muted font-italic">Расчет выполнен <?= Yii::$app->formatter->asDate($model->calculated_at, 'php:d F Y в H:i') ?> пользователем <?= $model->calculatedByProfileName ?>.</p>
+            <p class="text-muted font-italic">Расчет выполнен <?= Yii::$app->formatter->asDate($model->calculated_at, 'php:d F Y в H:i') ?> пользователем <?= $model->calculatedByProfileName ?>.</p>
             <?php endif; ?>
         </div>
         <div class="card-footer text-muted">

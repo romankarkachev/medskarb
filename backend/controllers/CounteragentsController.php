@@ -10,6 +10,7 @@ use common\models\CounteragentsFilesSearch;
 use common\models\Documents;
 use common\models\TypesCounteragents;
 use common\models\TypesDocuments;
+use common\models\DadataAPI;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
@@ -40,7 +41,7 @@ class CounteragentsController extends Controller
                         'actions' => [
                             'index', 'create', 'update', 'delete', 'summary-card', 'er',
                             'render-counteragents-info', 'render-ambiguous-counteragents-info',
-                            'fetch-bank-by-bik', 'fetch-counteragents-info-by-inn-orgn',
+                            'fetch-bank-by-bik', 'fetch-counteragents-info-by-inn-orgn', 'fetch-counteragents-info-dadata',
                             'list-for-document', 'list-of-customers', 'list-of-brokers-ru', 'list-of-brokers-lnr',
                             'upload-files', 'download', 'preview-file', 'delete-file',
                         ],
@@ -322,6 +323,68 @@ class CounteragentsController extends Controller
                 return $result;
 
             }
+        }
+
+        return false;
+    }
+
+    /**
+     * Получает подробную информацию о контрагенте через сервис dadata.ru.
+     * fetch-counteragents-info-dadata
+     * @param $query string ИНН или ОГРН контрагента
+     * @param $specifyingValue string КПП для уточнения
+     * @param $cleanDir integer
+     * @return array|false
+     */
+    public function actionFetchCounteragentsInfoDadata($query, $specifyingValue = null, $cleanDir = null)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $details = DadataAPI::postRequestToApi($query, $specifyingValue);
+        if (false !== $details) {
+            $result = [
+                'name' => $details['name']['full'],
+                'name_full' => $details['name']['full_with_opf'],
+                'name_short' => $details['name']['short_with_opf'],
+                'inn' => $details['inn'],
+                'ogrn' => $details['ogrn'],
+            ];
+            $result['kpp'] = $details['kpp'];
+            $result['address'] = $details['address']['unrestricted_value'];
+            if (isset($details['management'])) {
+                // полные ФИО директора
+                $result['dir_name'] = $details['management']['name'];
+                if (intval($cleanDir) == true) {
+                    $cleanName = DadataAPI::cleanName($result['dir_name']);
+                    if (!empty($cleanName)) {
+                        $result['dir_name_of'] = $cleanName['result_genitive'];
+                        // сокращенные ФИО директора в именительном падеже
+                        $result['dir_name_short'] = $cleanName['surname'] .
+                            (!empty($cleanName['name']) ? ' ' . mb_substr($cleanName['name'], 0, 1) . '.' : '') .
+                            (!empty($cleanName['patronymic']) ? ' ' . mb_substr($cleanName['patronymic'], 0, 1) . '.' : '');
+
+                        // просклоняем сокращенные ФИО
+                        //$cleanShortName = DadataAPI::cleanName($result['dir_name_short']);
+                        $cleanShortName = DadataAPI::cleanName('Каркачев');
+                        if (!empty($cleanShortName) && isset($cleanShortName['result_genitive'])) {
+                            $result['dir_name_short_of'] = $cleanShortName['result_genitive'];
+                        }
+                        else {
+                            // не удалось просклонять, просто берем сокращенные ФИО
+                            $result['dir_name_short_of'] = $result['dir_name_short'];
+                        }
+                    }
+                    else {
+                        // не удалось просклонять, просто берем полные ФИО
+                        $result['dir_name_of'] = $result['dir_name'];
+                    }
+                }
+            }
+            if (isset($details['management'])) {
+                $result['dir_post'] = $details['management']['post'];
+            }
+
+            return $result;
         }
 
         return false;
